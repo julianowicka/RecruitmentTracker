@@ -6,13 +6,13 @@ const sqlite = new Database('sqlite.db');
 const db = drizzle(sqlite);
 
 async function runMigrations() {
-  console.log('🚀 Running migrations...');
+  console.log('Running migrations...');
   
   try {
     migrate(db, { migrationsFolder: './drizzle' });
-    console.log('✅ Migrations completed successfully!');
+    console.log('Migrations completed successfully!');
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Migration failed:', error);
     process.exit(1);
   }
   
@@ -20,4 +20,5 @@ async function runMigrations() {
 }
 
 runMigrations();
+
 

@@ -56,7 +56,7 @@ function Home() {
       }}>
         <FeatureCard
           icon="✅"
-          title="CRUD Aplikacji"
+          title="Funkcje aplikacji"
           description="Dodawaj, edytuj i usuwaj swoje aplikacje o pracę"
         />
         <FeatureCard

@@ -2,17 +2,16 @@ import { db } from './index';
 import { applications, notes, statusHistory } from './schema';
 
 async function seed() {
-  console.log('🌱 Seeding database...');
+  console.log('Seeding database...');
 
   try {
-    // Dodanie przykładowych aplikacji
     const [app1] = await db
       .insert(applications)
       .values({
-        company: 'TechCorp',
+        company: 'Arasaka',
         role: 'Senior Frontend Developer',
         status: 'hr_interview',
-        link: 'https://techcorp.com/careers/senior-frontend',
+        link: 'https://arasaka.com/careers/senior-frontend',
         salaryMin: 15000,
         salaryMax: 20000,
       })
@@ -21,10 +20,10 @@ async function seed() {
     const [app2] = await db
       .insert(applications)
       .values({
-        company: 'StartupXYZ',
+        company: 'Trauma Team International',
         role: 'Full Stack Engineer',
         status: 'applied',
-        link: 'https://startupxyz.com/jobs',
+        link: 'https://trauma-team-international.com/jobs',
         salaryMin: 12000,
         salaryMax: 18000,
       })
@@ -33,7 +32,7 @@ async function seed() {
     const [app3] = await db
       .insert(applications)
       .values({
-        company: 'BigCompany',
+        company: 'Militech',
         role: 'React Developer',
         status: 'offer',
         salaryMin: 18000,
@@ -41,7 +40,7 @@ async function seed() {
       })
       .returning();
 
-    // Dodanie notatek
+    // Dodaie notatek
     await db.insert(notes).values([
       {
         applicationId: app1.id,
@@ -53,11 +52,10 @@ async function seed() {
       },
       {
         applicationId: app3.id,
-        content: 'Otrzymałem ofertę! Pensja: 20k PLN. Deadline odpowiedzi: 7 dni.',
+        content: 'Otrzymałem ofertę! Deadline odpowiedzi: 7 dni.',
       },
     ]);
 
-    // Dodanie historii zmian statusów
     await db.insert(statusHistory).values([
       {
         applicationId: app1.id,
@@ -76,12 +74,12 @@ async function seed() {
       },
     ]);
 
-    console.log('✅ Database seeded successfully!');
-    console.log(`   - Created ${3} applications`);
-    console.log(`   - Created ${3} notes`);
-    console.log(`   - Created ${3} status history entries`);
+    console.log('Database seeded successfully!');
+    console.log(`Created ${3} applications`);
+    console.log(`Created ${3} notes`);
+    console.log(`Created ${3} status history entries`);
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error('Seeding failed:', error);
     process.exit(1);
   }
 
@@ -89,4 +87,5 @@ async function seed() {
 }
 
 seed();
+
 

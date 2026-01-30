@@ -1,6 +1,4 @@
-/**
- * Dostępne statusy aplikacji o pracę
- */
+
 export const APPLICATION_STATUSES = {
   APPLIED: 'applied',
   HR_INTERVIEW: 'hr_interview',
@@ -11,9 +9,6 @@ export const APPLICATION_STATUSES = {
 
 export type ApplicationStatus = typeof APPLICATION_STATUSES[keyof typeof APPLICATION_STATUSES];
 
-/**
- * Etykiety dla statusów (do wyświetlania)
- */
 export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   applied: 'Aplikowano',
   hr_interview: 'Rozmowa HR',
@@ -22,9 +17,7 @@ export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   rejected: 'Odrzucone',
 };
 
-/**
- * Kolory dla statusów (do wyświetlania)
- */
+
 export const STATUS_COLORS: Record<ApplicationStatus, string> = {
   applied: '#3b82f6',
   hr_interview: '#8b5cf6',
@@ -32,4 +25,5 @@ export const STATUS_COLORS: Record<ApplicationStatus, string> = {
   offer: '#10b981',
   rejected: '#ef4444',
 };
+
 
