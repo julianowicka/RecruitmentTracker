@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { APPLICATION_STATUSES } from './constants';
 
-/**
- * Schema walidacji dla tworzenia nowej aplikacji
- */
-export const createApplicationSchema = z.object({
+// Base schema bez refine
+const baseApplicationSchema = z.object({
   company: z.string().min(1, 'Nazwa firmy jest wymagana').max(255),
   role: z.string().min(1, 'Nazwa stanowiska jest wymagana').max(255),
   status: z.enum([
@@ -17,9 +15,11 @@ export const createApplicationSchema = z.object({
   link: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
   salaryMin: z.number().int().positive().optional(),
   salaryMax: z.number().int().positive().optional(),
-}).refine(
+});
+
+// Create schema z walidacją salaryMax >= salaryMin
+export const createApplicationSchema = baseApplicationSchema.refine(
   (data) => {
-    // Sprawdź czy salaryMax >= salaryMin jeśli oba są podane
     if (data.salaryMin && data.salaryMax) {
       return data.salaryMax >= data.salaryMin;
     }
@@ -31,22 +31,16 @@ export const createApplicationSchema = z.object({
   }
 );
 
-/**
- * Schema walidacji dla aktualizacji aplikacji
- */
-export const updateApplicationSchema = createApplicationSchema.partial();
+// Update schema - partial bez refine (bo przy partial nie możemy zagwarantować że oba pola są obecne)
+export const updateApplicationSchema = baseApplicationSchema.partial();
 
-/**
- * Schema walidacji dla tworzenia notatki
- */
+
 export const createNoteSchema = z.object({
   applicationId: z.number().int().positive(),
   content: z.string().min(1, 'Treść notatki jest wymagana'),
 });
 
-/**
- * Schema walidacji dla zmiany statusu
- */
+
 export const updateStatusSchema = z.object({
   applicationId: z.number().int().positive(),
   newStatus: z.enum([
@@ -58,7 +52,6 @@ export const updateStatusSchema = z.object({
   ]),
 });
 
-// Eksportuj typy TypeScript
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;
