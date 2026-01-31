@@ -1,7 +1,6 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
-
 export const applications = sqliteTable('applications', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   company: text('company').notNull(),
@@ -18,7 +17,6 @@ export const applications = sqliteTable('applications', {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-
 export const notes = sqliteTable('notes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   applicationId: integer('application_id')
@@ -29,7 +27,6 @@ export const notes = sqliteTable('notes', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
-
 
 export const statusHistory = sqliteTable('status_history', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -49,5 +46,4 @@ export type Note = typeof notes.$inferSelect;
 export type InsertNote = typeof notes.$inferInsert;
 export type StatusHistory = typeof statusHistory.$inferSelect;
 export type InsertStatusHistory = typeof statusHistory.$inferInsert;
-
 

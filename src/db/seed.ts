@@ -40,7 +40,6 @@ async function seed() {
       })
       .returning();
 
-    // Dodaie notatek
     await db.insert(notes).values([
       {
         applicationId: app1.id,
