@@ -2,11 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../../lib/query-client';
 import type { Application } from '../../db/schema';
 
-async function fetchApplications(
-  status?: string | null
-): Promise<Application[]> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
+const STORAGE_KEY = 'recruitment-tracker-apps';
+
+function getStoredApplications(): Application[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
+}
+
+function initializeMockData(): Application[] {
+  const stored = getStoredApplications();
+  if (stored.length > 0) return stored;
+
   const mockData: Application[] = [
     {
       id: 1,
@@ -43,11 +50,22 @@ async function fetchApplications(
     },
   ];
 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData));
+  return mockData;
+}
+
+async function fetchApplications(
+  status?: string | null
+): Promise<Application[]> {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const allApps = initializeMockData();
+
   if (status) {
-    return mockData.filter(app => app.status === status);
+    return allApps.filter(app => app.status === status);
   }
 
-  return mockData;
+  return allApps;
 }
 
 
