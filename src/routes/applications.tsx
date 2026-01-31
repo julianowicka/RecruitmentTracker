@@ -1,10 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { useApplications } from '../hooks/queries/useApplications';
-import { useDeleteApplication } from '../hooks/queries/useApplicationMutations';
+import { useDeleteApplication, useCreateApplication } from '../hooks/queries/useApplicationMutations';
 import { ApplicationCard } from '../components/applications/ApplicationCard';
 import { StatusFilter } from '../components/applications/StatusFilter';
 import { SkeletonCards } from '../components/applications/SkeletonCards';
+import { ApplicationForm } from '../components/applications/ApplicationForm';
+import { Modal } from '../components/ui/Modal';
+import { useUIStore } from '../stores/ui-store';
 import { APPLICATION_STATUSES } from '../lib/constants';
 
 const applicationsSearchSchema = z.object({
@@ -30,6 +33,9 @@ function ApplicationsPage() {
   const { status } = Route.useSearch();
   const { data: applications, isLoading, error } = useApplications(status);
   const deleteMutation = useDeleteApplication();
+  const createMutation = useCreateApplication();
+  
+  const { isCreateModalOpen, openCreateModal, closeCreateModal } = useUIStore();
 
   const handleStatusChange = (newStatus: string | null) => {
     navigate({
@@ -41,6 +47,14 @@ function ApplicationsPage() {
     if (confirm(`Czy na pewno chcesz usunąć aplikację do ${company}?`)) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleCreateApplication = (data: any) => {
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        closeCreateModal();
+      },
+    });
   };
 
   const filteredApplications = applications?.filter((app) => 
@@ -56,15 +70,39 @@ function ApplicationsPage() {
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1>📋 Moje Aplikacje</h1>
-        <div style={{ 
-          padding: '0.5rem 1rem', 
-          backgroundColor: '#e0f2fe', 
-          borderRadius: '0.5rem',
-          fontSize: '0.9rem'
-        }}>
-          Znaleziono: <strong>{filteredApplications.length}</strong> aplikacji
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ 
+            padding: '0.5rem 1rem', 
+            backgroundColor: '#e0f2fe', 
+            borderRadius: '0.5rem',
+            fontSize: '0.9rem'
+          }}>
+            Znaleziono: <strong>{filteredApplications.length}</strong> aplikacji
+          </div>
+          <button
+            onClick={openCreateModal}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            ➕ Dodaj aplikację
+          </button>
         </div>
       </div>
+
+      <Modal isOpen={isCreateModalOpen} onClose={closeCreateModal} title="Dodaj nową aplikację">
+        <ApplicationForm onSubmit={handleCreateApplication} isSubmitting={createMutation.isPending} />
+      </Modal>
 
       <StatusFilter 
         activeStatus={status || null} 
