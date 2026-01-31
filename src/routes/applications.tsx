@@ -1,33 +1,41 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 import { useApplications } from '../hooks/queries/useApplications';
 import { useDeleteApplication } from '../hooks/queries/useApplicationMutations';
-import { STATUS_LABELS, STATUS_COLORS } from '../lib/constants';
+import { ApplicationCard } from '../components/applications/ApplicationCard';
+import { StatusFilter } from '../components/applications/StatusFilter';
+import { SkeletonCards } from '../components/applications/SkeletonCards';
+import { APPLICATION_STATUSES } from '../lib/constants';
+
+const applicationsSearchSchema = z.object({
+  status: z
+    .enum([
+      APPLICATION_STATUSES.APPLIED,
+      APPLICATION_STATUSES.HR_INTERVIEW,
+      APPLICATION_STATUSES.TECH_INTERVIEW,
+      APPLICATION_STATUSES.OFFER,
+      APPLICATION_STATUSES.REJECTED,
+    ])
+    .optional()
+    .catch(undefined),
+});
 
 export const Route = createFileRoute('/applications')({
   component: ApplicationsPage,
+  validateSearch: applicationsSearchSchema,
 });
 
 function ApplicationsPage() {
-  const { data: applications, isLoading, error } = useApplications();
+  const navigate = Route.useNavigate();
+  const { status } = Route.useSearch();
+  const { data: applications, isLoading, error } = useApplications(status);
   const deleteMutation = useDeleteApplication();
 
-  if (isLoading) {
-    return (
-      <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-        <h1>Moje Aplikacje</h1>
-        <p>Ładowanie...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-        <h1>📋 Moje Aplikacje</h1>
-        <p style={{ color: 'red' }}>Błąd: {error.message}</p>
-      </div>
-    );
-  }
+  const handleStatusChange = (newStatus: string | null) => {
+    navigate({
+      search: { status: newStatus as typeof status },
+    });
+  };
 
   const handleDelete = (id: number, company: string) => {
     if (confirm(`Czy na pewno chcesz usunąć aplikację do ${company}?`)) {
@@ -35,21 +43,50 @@ function ApplicationsPage() {
     }
   };
 
+  const filteredApplications = applications?.filter((app) => 
+    !status || app.status === status
+  ) || [];
+
+  const statusCounts = applications?.reduce((acc, app) => {
+    acc[app.status] = (acc[app.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) || {};
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1>Moje Aplikacje</h1>
+        <h1>📋 Moje Aplikacje</h1>
         <div style={{ 
           padding: '0.5rem 1rem', 
           backgroundColor: '#e0f2fe', 
           borderRadius: '0.5rem',
           fontSize: '0.9rem'
         }}>
-          Znaleziono: <strong>{applications?.length || 0}</strong> aplikacji
+          Znaleziono: <strong>{filteredApplications.length}</strong> aplikacji
         </div>
       </div>
 
-      {!applications || applications.length === 0 ? (
+      <StatusFilter 
+        activeStatus={status || null} 
+        onStatusChange={handleStatusChange}
+        counts={statusCounts}
+      />
+
+      {isLoading && <SkeletonCards count={3} />}
+
+      {error && (
+        <div style={{ 
+          padding: '2rem', 
+          backgroundColor: '#fee2e2', 
+          borderRadius: '0.5rem',
+          border: '2px solid #ef4444'
+        }}>
+          <h3 style={{ color: '#991b1b', marginTop: 0 }}>❌ Błąd</h3>
+          <p style={{ color: '#7f1d1d' }}>{error.message}</p>
+        </div>
+      )}
+
+      {!isLoading && !error && filteredApplications.length === 0 && (
         <div style={{ 
           padding: '3rem', 
           textAlign: 'center', 
@@ -59,78 +96,24 @@ function ApplicationsPage() {
         }}>
           <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</p>
           <h3>Brak aplikacji</h3>
-          <p style={{ color: '#666' }}>Dodaj swoją pierwszą aplikację o pracę!</p>
+          <p style={{ color: '#666' }}>
+            {status 
+              ? `Brak aplikacji ze statusem "${status}". Spróbuj innego filtra!`
+              : 'Dodaj swoją pierwszą aplikację o pracę!'
+            }
+          </p>
         </div>
-      ) : (
+      )}
+
+      {!isLoading && !error && filteredApplications.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {applications.map((app) => (
-            <div
+          {filteredApplications.map((app) => (
+            <ApplicationCard
               key={app.id}
-              style={{
-                padding: '1.5rem',
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                border: '1px solid #e5e7eb',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{app.company}</h3>
-                    <span
-                      style={{
-                        padding: '0.25rem 0.75rem',
-                        backgroundColor: STATUS_COLORS[app.status as keyof typeof STATUS_COLORS],
-                        color: 'white',
-                        borderRadius: '999px',
-                        fontSize: '0.75rem',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {STATUS_LABELS[app.status as keyof typeof STATUS_LABELS]}
-                    </span>
-                  </div>
-                  <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '1.1rem' }}>
-                    <strong>{app.role}</strong>
-                  </p>
-                  {(app.salaryMin || app.salaryMax) && (
-                    <p style={{ margin: '0.5rem 0', color: '#666' }}>
-                      💰 Widełki: {app.salaryMin || '?'} - {app.salaryMax || '?'} PLN
-                    </p>
-                  )}
-                  {app.link && (
-                    <p style={{ margin: '0.5rem 0' }}>
-                      🔗{' '}
-                      <a href={app.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>
-                        Link do ogłoszenia
-                      </a>
-                    </p>
-                  )}
-                  <p style={{ margin: '0.5rem 0', color: '#999', fontSize: '0.85rem' }}>
-                    Dodano: {new Date(app.createdAt).toLocaleDateString('pl-PL')}
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={() => handleDelete(app.id, app.company)}
-                    disabled={deleteMutation.isPending}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.375rem',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      opacity: deleteMutation.isPending ? 0.5 : 1,
-                    }}
-                  >
-                    🗑️ Usuń
-                  </button>
-                </div>
-              </div>
-            </div>
+              application={app}
+              onDelete={handleDelete}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === app.id}
+            />
           ))}
         </div>
       )}
@@ -143,8 +126,7 @@ function ApplicationsPage() {
         border: '1px solid #86efac'
       }}>
         <p style={{ margin: 0, fontSize: '0.9rem' }}>
-          ✅ <strong>Wow działa!</strong> TanStack Query fetchuje dane z API. 
-          Otwórz DevTools (ikonka React Query na dole ekranu) i zobacz cache w akcji!
+          ✅ <strong>Filtrowanie </strong> TanStack Query cachuje dane osobno dla każdego statusu!
         </p>
       </div>
     </div>

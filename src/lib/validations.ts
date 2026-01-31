@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { APPLICATION_STATUSES } from './constants';
 
-// Base schema bez refine
 const baseApplicationSchema = z.object({
   company: z.string().min(1, 'Nazwa firmy jest wymagana').max(255),
   role: z.string().min(1, 'Nazwa stanowiska jest wymagana').max(255),
@@ -17,7 +16,6 @@ const baseApplicationSchema = z.object({
   salaryMax: z.number().int().positive().optional(),
 });
 
-// Create schema z walidacją salaryMax >= salaryMin
 export const createApplicationSchema = baseApplicationSchema.refine(
   (data) => {
     if (data.salaryMin && data.salaryMax) {
@@ -31,7 +29,6 @@ export const createApplicationSchema = baseApplicationSchema.refine(
   }
 );
 
-// Update schema - partial bez refine (bo przy partial nie możemy zagwarantować że oba pola są obecne)
 export const updateApplicationSchema = baseApplicationSchema.partial();
 
 

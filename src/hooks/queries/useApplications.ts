@@ -2,20 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../../lib/query-client';
 import type { Application } from '../../db/schema';
 
-// Temporary mock data - będziemy to zastąpić prawdziwym API
 async function fetchApplications(
   status?: string | null
 ): Promise<Application[]> {
-  // Symuluj opóźnienie sieciowe
   await new Promise(resolve => setTimeout(resolve, 500));
   
   const mockData: Application[] = [
     {
       id: 1,
-      company: 'TechCorp',
+      company: 'Arasaka',
       role: 'Senior Frontend Developer',
       status: 'hr_interview',
-      link: 'https://techcorp.com/careers',
+      link: 'https://arasaka.com/careers',
       salaryMin: 15000,
       salaryMax: 20000,
       createdAt: new Date().toISOString(),
@@ -23,10 +21,10 @@ async function fetchApplications(
     },
     {
       id: 2,
-      company: 'StartupXYZ',
+      company: 'Trauma Team International',
       role: 'Full Stack Engineer',
       status: 'applied',
-      link: 'https://startupxyz.com/jobs',
+      link: 'https://trauma-team-international.com/jobs',
       salaryMin: 12000,
       salaryMax: 18000,
       createdAt: new Date().toISOString(),
@@ -34,7 +32,7 @@ async function fetchApplications(
     },
     {
       id: 3,
-      company: 'BigCompany',
+      company: 'Miltech',
       role: 'React Developer',
       status: 'offer',
       link: null,
@@ -45,7 +43,6 @@ async function fetchApplications(
     },
   ];
 
-  // Filtruj po statusie jeśli podano
   if (status) {
     return mockData.filter(app => app.status === status);
   }
@@ -54,10 +51,10 @@ async function fetchApplications(
 }
 
 
-export function useApplications(filters: { status?: string | null } = {}) {
+export function useApplications(status?: string) {
   return useQuery({
-    queryKey: queryKeys.applications.list(filters),
-    queryFn: () => fetchApplications(filters.status),
+    queryKey: queryKeys.applications.list({ status }),
+    queryFn: () => fetchApplications(status),
     
     staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
