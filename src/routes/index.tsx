@@ -76,17 +76,6 @@ function Home() {
         />
       </div>
 
-      <div style={{ marginTop: '4rem', padding: '2rem', backgroundColor: '#f3f4f6', borderRadius: '0.5rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>🚀 Stack Technologiczny</h2>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          <li>✨ <strong>TanStack Start</strong> - Full-stack React framework</li>
-          <li>🔄 <strong>TanStack Query</strong> - Server state management</li>
-          <li>✅ <strong>Zod</strong> - Walidacja danych</li>
-          <li>🎨 <strong>Zustand</strong> - UI state management</li>
-          <li>💾 <strong>Drizzle ORM</strong> - Type-safe database queries</li>
-          <li>🗄️ <strong>SQLite</strong> - Embedded database</li>
-        </ul>
-      </div>
     </div>
   );
 }

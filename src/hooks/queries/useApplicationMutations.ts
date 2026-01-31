@@ -6,7 +6,6 @@ import type {
   UpdateApplicationInput,
 } from '../../lib/validations';
 
-// Temporary mock - będziemy to zastąpić prawdziwym API
 async function createApplication(
   data: CreateApplicationInput
 ): Promise<Application> {
@@ -79,7 +78,6 @@ export function useUpdateApplication() {
 }
 
 
-// Temporary mock delete
 async function deleteApplication(id: number): Promise<{ id: number }> {
   await new Promise(resolve => setTimeout(resolve, 300));
   return { id };

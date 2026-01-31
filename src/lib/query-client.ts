@@ -19,7 +19,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-
 export const queryKeys = {
   applications: {
     all: ['applications'] as const,

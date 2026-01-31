@@ -17,7 +17,6 @@ export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   rejected: 'Odrzucone',
 };
 
-
 export const STATUS_COLORS: Record<ApplicationStatus, string> = {
   applied: '#3b82f6',
   hr_interview: '#8b5cf6',
@@ -25,5 +24,4 @@ export const STATUS_COLORS: Record<ApplicationStatus, string> = {
   offer: '#10b981',
   rejected: '#ef4444',
 };
-
 
