@@ -5,10 +5,11 @@ import type { ApplicationStatus } from '../../lib/constants';
 interface ApplicationCardProps {
   application: Application;
   onDelete: (id: number, company: string) => void;
+  onEdit: (id: number) => void;
   isDeleting?: boolean;
 }
 
-export function ApplicationCard({ application, onDelete, isDeleting = false }: ApplicationCardProps) {
+export function ApplicationCard({ application, onDelete, onEdit, isDeleting = false }: ApplicationCardProps) {
   const { id, company, role, status, link, salaryMin, salaryMax, createdAt } = application;
 
   return (
@@ -62,6 +63,31 @@ export function ApplicationCard({ application, onDelete, isDeleting = false }: A
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={() => onEdit(id)}
+            disabled={isDeleting}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.375rem',
+              cursor: isDeleting ? 'not-allowed' : 'pointer',
+              fontSize: '0.875rem',
+              opacity: isDeleting ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isDeleting) {
+                e.currentTarget.style.backgroundColor = '#2563eb';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#3b82f6';
+            }}
+          >
+            ✏️ Edytuj
+          </button>
           <button
             onClick={() => onDelete(id, company)}
             disabled={isDeleting}
