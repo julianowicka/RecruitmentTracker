@@ -6,54 +6,33 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+    <div className="p-8 max-w-6xl mx-auto">
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold mb-4">
           📋 Recruitment Tracker
         </h1>
-        <p style={{ fontSize: '1.25rem', color: '#666', marginBottom: '2rem' }}>
+        <p className="text-xl text-gray-600 mb-8">
           Zarządzaj swoimi aplikacjami o pracę w jednym miejscu
         </p>
         
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+        <div className="flex gap-4 justify-center">
           <Link
             to="/applications"
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-            }}
+            className="px-8 py-4 bg-blue-500 text-white no-underline rounded-lg font-bold text-lg hover:bg-blue-600 transition-colors"
           >
             Zobacz Aplikacje
           </Link>
           
           <Link
             to="/dashboard"
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: '#8b5cf6',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-            }}
+            className="px-8 py-4 bg-purple-500 text-white no-underline rounded-lg font-bold text-lg hover:bg-purple-600 transition-colors"
           >
             Dashboard
           </Link>
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '2rem',
-        marginTop: '3rem'
-      }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-8 mt-12">
         <FeatureCard
           icon="✅"
           title="Funkcje aplikacji"
@@ -82,15 +61,10 @@ function Home() {
 
 function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div style={{
-      padding: '1.5rem',
-      backgroundColor: 'white',
-      borderRadius: '0.5rem',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    }}>
-      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</div>
-      <h3 style={{ marginBottom: '0.5rem' }}>{title}</h3>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>{description}</p>
+    <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+      <div className="text-4xl mb-2">{icon}</div>
+      <h3 className="mb-2 font-semibold">{title}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
     </div>
   );
 }
