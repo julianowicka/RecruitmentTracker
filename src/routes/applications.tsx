@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { useApplications } from '../hooks/queries/useApplications';
-import { useDeleteApplication, useCreateApplication } from '../hooks/queries/useApplicationMutations';
+import { useApplication } from '../hooks/queries/useApplication';
+import { useDeleteApplication, useCreateApplication, useUpdateApplication } from '../hooks/queries/useApplicationMutations';
 import { ApplicationCard } from '../components/applications/ApplicationCard';
 import { StatusFilter } from '../components/applications/StatusFilter';
 import { SkeletonCards } from '../components/applications/SkeletonCards';
@@ -34,8 +35,21 @@ function ApplicationsPage() {
   const { data: applications, isLoading, error } = useApplications(status);
   const deleteMutation = useDeleteApplication();
   const createMutation = useCreateApplication();
+  const updateMutation = useUpdateApplication();
   
-  const { isCreateModalOpen, openCreateModal, closeCreateModal } = useUIStore();
+  const { 
+    isCreateModalOpen, 
+    openCreateModal, 
+    closeCreateModal,
+    isEditModalOpen,
+    editingApplicationId,
+    openEditModal,
+    closeEditModal,
+  } = useUIStore();
+
+  const { data: editingApplication } = useApplication(editingApplicationId ?? 0, {
+    enabled: !!editingApplicationId,
+  });
 
   const handleStatusChange = (newStatus: string | null) => {
     navigate({
@@ -49,12 +63,29 @@ function ApplicationsPage() {
     }
   };
 
+  const handleEdit = (id: number) => {
+    openEditModal(id);
+  };
+
   const handleCreateApplication = (data: any) => {
     createMutation.mutate(data, {
       onSuccess: () => {
         closeCreateModal();
       },
     });
+  };
+
+  const handleUpdateApplication = (data: any) => {
+    if (!editingApplicationId) return;
+    
+    updateMutation.mutate(
+      { id: editingApplicationId, data },
+      {
+        onSuccess: () => {
+          closeEditModal();
+        },
+      }
+    );
   };
 
   const filteredApplications = applications?.filter((app) => 
@@ -104,6 +135,15 @@ function ApplicationsPage() {
         <ApplicationForm onSubmit={handleCreateApplication} isSubmitting={createMutation.isPending} />
       </Modal>
 
+      <Modal isOpen={isEditModalOpen} onClose={closeEditModal} title="Edytuj aplikację">
+        <ApplicationForm 
+          onSubmit={handleUpdateApplication} 
+          isSubmitting={updateMutation.isPending}
+          initialData={editingApplication || null}
+          mode="edit"
+        />
+      </Modal>
+
       <StatusFilter 
         activeStatus={status || null} 
         onStatusChange={handleStatusChange}
@@ -150,6 +190,7 @@ function ApplicationsPage() {
               key={app.id}
               application={app}
               onDelete={handleDelete}
+              onEdit={handleEdit}
               isDeleting={deleteMutation.isPending && deleteMutation.variables === app.id}
             />
           ))}
