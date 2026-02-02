@@ -23,59 +23,23 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '1rem',
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4"
       onClick={onClose}
     >
       <div
-        style={{
-          backgroundColor: 'white',
-          borderRadius: '0.5rem',
-          maxWidth: '600px',
-          width: '100%',
-          maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-        }}
+        className="bg-white rounded-lg max-w-[600px] w-full max-h-[90vh] overflow-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          style={{
-            padding: '1.5rem',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{title}</h2>
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="m-0 text-2xl font-semibold">{title}</h2>
           <button
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              color: '#6b7280',
-              padding: '0.25rem',
-              lineHeight: 1,
-            }}
+            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 p-1 leading-none hover:text-gray-700 transition-colors"
           >
             ×
           </button>
         </div>
-        <div style={{ padding: '1.5rem' }}>{children}</div>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );

@@ -9,23 +9,15 @@ export function Badge({ status, size = 'md' }: BadgeProps) {
   const label = STATUS_LABELS[status];
   const color = STATUS_COLORS[status];
   
-  const sizeStyles = {
-    sm: { padding: '0.25rem 0.5rem', fontSize: '0.7rem' },
-    md: { padding: '0.25rem 0.75rem', fontSize: '0.75rem' },
+  const sizeClasses = {
+    sm: 'px-2 py-1 text-[0.7rem]',
+    md: 'px-3 py-1 text-xs',
   };
   
   return (
     <span
-      style={{
-        ...sizeStyles[size],
-        backgroundColor: color,
-        color: 'white',
-        borderRadius: '999px',
-        fontWeight: 'bold',
-        display: 'inline-block',
-        textTransform: 'uppercase',
-        letterSpacing: '0.025em',
-      }}
+      className={`inline-block rounded-full font-bold text-white uppercase tracking-wider ${sizeClasses[size]}`}
+      style={{ backgroundColor: color }}
     >
       {label}
     </span>
