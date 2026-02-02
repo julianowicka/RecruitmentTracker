@@ -3,22 +3,37 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { createApplicationSchema } from '../../lib/validations';
 import { APPLICATION_STATUSES, STATUS_LABELS } from '../../lib/constants';
+import type { Application } from '../../db/schema';
 
 type ApplicationFormData = z.infer<typeof createApplicationSchema>;
 
 interface ApplicationFormProps {
   onSubmit: (data: ApplicationFormData) => void;
   isSubmitting?: boolean;
+  initialData?: Application | null;
+  mode?: 'create' | 'edit';
 }
 
-export function ApplicationForm({ onSubmit, isSubmitting = false }: ApplicationFormProps) {
+export function ApplicationForm({ 
+  onSubmit, 
+  isSubmitting = false,
+  initialData = null,
+  mode = 'create'
+}: ApplicationFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(createApplicationSchema),
-    defaultValues: {
+    defaultValues: initialData ? {
+      company: initialData.company,
+      role: initialData.role,
+      status: initialData.status,
+      link: initialData.link || undefined,
+      salaryMin: initialData.salaryMin || undefined,
+      salaryMax: initialData.salaryMax || undefined,
+    } : {
       status: APPLICATION_STATUSES.APPLIED,
     },
   });
@@ -183,7 +198,10 @@ export function ApplicationForm({ onSubmit, isSubmitting = false }: ApplicationF
             fontWeight: 'bold',
           }}
         >
-          {isSubmitting ? '⏳ Dodawanie...' : '✅ Dodaj aplikację'}
+          {isSubmitting 
+            ? (mode === 'edit' ? '⏳ Zapisywanie...' : '⏳ Dodawanie...') 
+            : (mode === 'edit' ? '💾 Zapisz zmiany' : '✅ Dodaj aplikację')
+          }
         </button>
       </div>
     </form>
