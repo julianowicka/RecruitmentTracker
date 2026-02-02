@@ -101,19 +101,28 @@ async function updateApplication({
   id: number;
   data: UpdateApplicationInput;
 }): Promise<Application> {
-  const response = await fetch(`/api/applications/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-
-  const result: { data: Application; error?: string } = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.error || 'Failed to update application');
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const allApps = getStoredApplications();
+  const appIndex = allApps.findIndex(app => app.id === id);
+  
+  if (appIndex === -1) {
+    throw new Error('Application not found');
   }
 
-  return result.data;
+  const updatedApp: Application = {
+    ...allApps[appIndex],
+    ...data,
+    link: data.link !== undefined ? (data.link || null) : allApps[appIndex].link,
+    salaryMin: data.salaryMin !== undefined ? (data.salaryMin ?? null) : allApps[appIndex].salaryMin,
+    salaryMax: data.salaryMax !== undefined ? (data.salaryMax ?? null) : allApps[appIndex].salaryMax,
+    updatedAt: new Date().toISOString(),
+  };
+
+  allApps[appIndex] = updatedApp;
+  saveApplications(allApps);
+
+  return updatedApp;
 }
 
 
@@ -123,11 +132,47 @@ export function useUpdateApplication() {
   return useMutation({
     mutationFn: updateApplication,
     
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.applications.detail(data.id),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.applications.lists(),
       });
-      
+
+      const previousApplications = queryClient.getQueriesData({
+        queryKey: queryKeys.applications.lists(),
+      });
+
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.applications.lists() },
+        (old: Application[] | undefined) => {
+          if (!old) return old;
+          return old.map((app) => {
+            if (app.id === id) {
+              return {
+                ...app,
+                ...data,
+                link: data.link !== undefined ? (data.link || null) : app.link,
+                salaryMin: data.salaryMin !== undefined ? (data.salaryMin ?? null) : app.salaryMin,
+                salaryMax: data.salaryMax !== undefined ? (data.salaryMax ?? null) : app.salaryMax,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return app;
+          });
+        }
+      );
+
+      return { previousApplications };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousApplications) {
+        context.previousApplications.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.applications.lists(),
       });
