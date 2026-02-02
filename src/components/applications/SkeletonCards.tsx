@@ -4,40 +4,24 @@ interface SkeletonCardProps {
 
 function SkeletonCard() {
   return (
-    <div
-      style={{
-        padding: '1.5rem',
-        backgroundColor: 'white',
-        borderRadius: '0.5rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb',
-        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      }}
-    >
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center' }}>
-        <div style={{ height: '1.5rem', width: '10rem', backgroundColor: '#e5e7eb', borderRadius: '0.25rem' }} />
-        <div style={{ height: '1.5rem', width: '6rem', backgroundColor: '#e5e7eb', borderRadius: '999px' }} />
+    <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 animate-pulse">
+      <div className="flex gap-4 mb-4 items-center">
+        <div className="h-6 w-40 bg-gray-200 rounded" />
+        <div className="h-6 w-24 bg-gray-200 rounded-full" />
       </div>
 
-      <div style={{ height: '1.25rem', width: '14rem', backgroundColor: '#e5e7eb', borderRadius: '0.25rem', marginBottom: '0.75rem' }} />
+      <div className="h-5 w-56 bg-gray-200 rounded mb-3" />
 
-      <div style={{ height: '1rem', width: '12rem', backgroundColor: '#e5e7eb', borderRadius: '0.25rem', marginBottom: '0.5rem' }} />
+      <div className="h-4 w-48 bg-gray-200 rounded mb-2" />
 
-      <div style={{ height: '0.875rem', width: '8rem', backgroundColor: '#e5e7eb', borderRadius: '0.25rem' }} />
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      <div className="h-3.5 w-32 bg-gray-200 rounded" />
     </div>
   );
 }
 
 export function SkeletonCards({ count = 3 }: SkeletonCardProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div className="flex flex-col gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}

@@ -39,67 +39,53 @@ export function ApplicationForm({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <div>
-        <label htmlFor="company" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label htmlFor="company" className="block mb-2 font-bold">
           Firma *
         </label>
         <input
           id="company"
           {...register('company')}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: errors.company ? '2px solid #ef4444' : '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-          }}
+          className={`w-full px-3 py-2 rounded-md text-base ${
+            errors.company ? 'border-2 border-red-500' : 'border border-gray-300'
+          }`}
           placeholder="np. Arasaka Corporation"
         />
         {errors.company && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+          <p className="text-red-500 text-sm mt-1">
             {errors.company.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="role" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label htmlFor="role" className="block mb-2 font-bold">
           Stanowisko *
         </label>
         <input
           id="role"
           {...register('role')}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: errors.role ? '2px solid #ef4444' : '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-          }}
+          className={`w-full px-3 py-2 rounded-md text-base ${
+            errors.role ? 'border-2 border-red-500' : 'border border-gray-300'
+          }`}
           placeholder="np. Senior Frontend Developer"
         />
         {errors.role && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+          <p className="text-red-500 text-sm mt-1">
             {errors.role.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="status" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label htmlFor="status" className="block mb-2 font-bold">
           Status
         </label>
         <select
           id="status"
           {...register('status')}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-base"
         >
           <option value={APPLICATION_STATUSES.APPLIED}>{STATUS_LABELS.applied}</option>
           <option value={APPLICATION_STATUSES.HR_INTERVIEW}>{STATUS_LABELS.hr_interview}</option>
@@ -110,93 +96,76 @@ export function ApplicationForm({
       </div>
 
       <div>
-        <label htmlFor="link" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label htmlFor="link" className="block mb-2 font-bold">
           Link do ogłoszenia
         </label>
         <input
           id="link"
           {...register('link')}
           type="url"
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: errors.link ? '2px solid #ef4444' : '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-          }}
+          className={`w-full px-3 py-2 rounded-md text-base ${
+            errors.link ? 'border-2 border-red-500' : 'border border-gray-300'
+          }`}
           placeholder="https://..."
         />
         {errors.link && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+          <p className="text-red-500 text-sm mt-1">
             {errors.link.message}
           </p>
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="salaryMin" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+          <label htmlFor="salaryMin" className="block mb-2 font-bold">
             Wynagrodzenie min (PLN)
           </label>
           <input
             id="salaryMin"
             {...register('salaryMin', { valueAsNumber: true })}
             type="number"
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: errors.salaryMin ? '2px solid #ef4444' : '1px solid #d1d5db',
-              borderRadius: '0.375rem',
-              fontSize: '1rem',
-            }}
+            className={`w-full px-3 py-2 rounded-md text-base ${
+              errors.salaryMin ? 'border-2 border-red-500' : 'border border-gray-300'
+            }`}
             placeholder="15000"
           />
           {errors.salaryMin && (
-            <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.salaryMin.message}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="salaryMax" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+          <label htmlFor="salaryMax" className="block mb-2 font-bold">
             Wynagrodzenie max (PLN)
           </label>
           <input
             id="salaryMax"
             {...register('salaryMax', { valueAsNumber: true })}
             type="number"
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: errors.salaryMax ? '2px solid #ef4444' : '1px solid #d1d5db',
-              borderRadius: '0.375rem',
-              fontSize: '1rem',
-            }}
+            className={`w-full px-3 py-2 rounded-md text-base ${
+              errors.salaryMax ? 'border-2 border-red-500' : 'border border-gray-300'
+            }`}
             placeholder="20000"
           />
           {errors.salaryMax && (
-            <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.salaryMax.message}
             </p>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+      <div className="flex gap-2 justify-end mt-4">
         <button
           type="submit"
           disabled={isSubmitting}
-          style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: isSubmitting ? '#9ca3af' : '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-          }}
+          className={`px-6 py-3 text-white border-none rounded-md text-base font-bold ${
+            isSubmitting 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-blue-500 cursor-pointer hover:bg-blue-600'
+          }`}
         >
           {isSubmitting 
             ? (mode === 'edit' ? '⏳ Zapisywanie...' : '⏳ Dodawanie...') 

@@ -14,94 +14,68 @@ export function ApplicationCard({ application, onDelete, onEdit, isDeleting = fa
 
   return (
     <div
-      style={{
-        padding: '1.5rem',
-        backgroundColor: 'white',
-        borderRadius: '0.5rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb',
-        transition: 'all 0.2s',
-        opacity: isDeleting ? 0.5 : 1,
-      }}
+      className={`p-6 bg-white rounded-lg shadow-sm border border-gray-200 transition-all duration-200 ${
+        isDeleting ? 'opacity-50' : 'opacity-100'
+      }`}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-4 mb-2">
+            <h3 className="m-0 text-xl font-semibold">
               🏢 {company}
             </h3>
             <Badge status={status as ApplicationStatus} />
           </div>
 
-          <p style={{ margin: '0.5rem 0', color: '#374151', fontSize: '1.1rem' }}>
+          <p className="my-2 text-gray-700 text-lg">
             <strong>{role}</strong>
           </p>
 
           {(salaryMin || salaryMax) && (
-            <p style={{ margin: '0.5rem 0', color: '#6b7280' }}>
+            <p className="my-2 text-gray-500">
               💰 Widełki: {salaryMin || '?'} - {salaryMax || '?'} PLN
             </p>
           )}
 
           {link && (
-            <p style={{ margin: '0.5rem 0' }}>
+            <p className="my-2">
               🔗{' '}
               <a 
                 href={link} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                style={{ color: '#3b82f6', textDecoration: 'none' }}
+                className="text-blue-500 no-underline hover:text-blue-700 transition-colors"
               >
                 Link do ogłoszenia
               </a>
             </p>
           )}
 
-          <p style={{ margin: '0.5rem 0 0 0', color: '#9ca3af', fontSize: '0.85rem' }}>
+          <p className="mt-2 mb-0 text-gray-400 text-sm">
             📅 Dodano: {new Date(createdAt).toLocaleDateString('pl-PL')}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex gap-2">
           <button
             onClick={() => onEdit(id)}
             disabled={isDeleting}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: isDeleting ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              opacity: isDeleting ? 0.5 : 1,
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              if (!isDeleting) {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
-            }}
+            className={`px-4 py-2 bg-blue-500 text-white border-none rounded-md text-sm transition-all duration-200 ${
+              isDeleting 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'opacity-100 cursor-pointer hover:bg-blue-600'
+            }`}
           >
             ✏️ Edytuj
           </button>
           <button
             onClick={() => onDelete(id, company)}
             disabled={isDeleting}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: isDeleting ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              opacity: isDeleting ? 0.5 : 1,
-              transition: 'opacity 0.2s',
-            }}
+            className={`px-4 py-2 bg-red-500 text-white border-none rounded-md text-sm transition-opacity duration-200 ${
+              isDeleting 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'opacity-100 cursor-pointer hover:bg-red-600'
+            }`}
           >
             🗑️ Usuń
           </button>

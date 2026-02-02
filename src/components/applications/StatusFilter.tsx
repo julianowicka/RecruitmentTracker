@@ -17,15 +17,7 @@ export function StatusFilter({ activeStatus, onStatusChange, counts }: StatusFil
   ];
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      gap: '0.5rem', 
-      flexWrap: 'wrap',
-      marginBottom: '1.5rem',
-      padding: '1rem',
-      backgroundColor: '#f9fafb',
-      borderRadius: '0.5rem',
-    }}>
+    <div className="flex gap-2 flex-wrap mb-6 p-4 bg-gray-50 rounded-lg">
       {allStatuses.map(({ value, label, color }) => {
         const isActive = activeStatus === value;
         const count = counts && value ? counts[value] : undefined;
@@ -34,31 +26,24 @@ export function StatusFilter({ activeStatus, onStatusChange, counts }: StatusFil
           <button
             key={value || 'all'}
             onClick={() => onStatusChange(value)}
+            className={`px-4 py-2 rounded-lg cursor-pointer text-sm transition-all duration-200 flex items-center gap-2 ${
+              isActive 
+                ? 'text-white font-bold' 
+                : 'bg-white text-gray-700 font-normal hover:shadow-md'
+            }`}
             style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: isActive ? color : 'white',
-              color: isActive ? 'white' : '#374151',
-              border: `2px solid ${isActive ? color : '#e5e7eb'}`,
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: isActive ? 'bold' : 'normal',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
+              backgroundColor: isActive ? color : undefined,
+              borderWidth: '2px',
+              borderStyle: 'solid',
+              borderColor: isActive ? color : '#e5e7eb',
             }}
           >
             {label}
             {count !== undefined && (
               <span
-                style={{
-                  padding: '0.125rem 0.5rem',
-                  backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : '#e5e7eb',
-                  borderRadius: '999px',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                }}
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  isActive ? 'bg-white/30' : 'bg-gray-200'
+                }`}
               >
                 {count}
               </span>
