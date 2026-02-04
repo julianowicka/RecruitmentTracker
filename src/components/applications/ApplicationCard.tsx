@@ -1,6 +1,7 @@
 import { Badge } from '../ui/Badge';
-import type { Application } from '../../db/schema';
+import type { Application } from '../../api/applications';
 import type { ApplicationStatus } from '../../lib/constants';
+import { Link } from '@tanstack/react-router';
 
 interface ApplicationCardProps {
   application: Application;
@@ -57,6 +58,13 @@ export function ApplicationCard({ application, onDelete, onEdit, isDeleting = fa
         </div>
 
         <div className="flex gap-2">
+          <Link
+            to="/applications/$id"
+            params={{ id: id.toString() }}
+            className="px-4 py-2 bg-purple-500 text-white border-none rounded-md text-sm transition-all duration-200 hover:bg-purple-600 flex items-center"
+          >
+            📋 Szczegóły
+          </Link>
           <button
             onClick={() => onEdit(id)}
             disabled={isDeleting}
