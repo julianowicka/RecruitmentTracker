@@ -27,6 +27,17 @@ export const queryKeys = {
       [...queryKeys.applications.lists(), filters] as const,
     details: () => [...queryKeys.applications.all, 'detail'] as const,
     detail: (id: number) => [...queryKeys.applications.details(), id] as const,
+    stats: () => [...queryKeys.applications.all, 'stats'] as const,
+  },
+  notes: {
+    all: ['notes'] as const,
+    lists: () => [...queryKeys.notes.all, 'list'] as const,
+    list: (applicationId: number) => [...queryKeys.notes.lists(), applicationId] as const,
+  },
+  statusHistory: {
+    all: ['statusHistory'] as const,
+    lists: () => [...queryKeys.statusHistory.all, 'list'] as const,
+    list: (applicationId: number) => [...queryKeys.statusHistory.lists(), applicationId] as const,
   },
 };
 
