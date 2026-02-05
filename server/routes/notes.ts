@@ -5,7 +5,6 @@ import { eq, desc } from 'drizzle-orm';
 
 export const notesRouter = Router();
 
-// GET /api/notes?applicationId=X - Get notes for application
 notesRouter.get('/', async (req, res) => {
   try {
     const { applicationId } = req.query;
@@ -29,10 +28,9 @@ notesRouter.get('/', async (req, res) => {
   }
 });
 
-// POST /api/notes - Create new note
 notesRouter.post('/', async (req, res) => {
   try {
-    const { applicationId, content } = req.body;
+    const { applicationId, content, category = 'general' } = req.body;
 
     if (!applicationId || !content) {
       return res.status(400).json({ error: 'applicationId and content are required' });
@@ -43,6 +41,7 @@ notesRouter.post('/', async (req, res) => {
       .values({
         applicationId,
         content,
+        category,
       })
       .returning();
 
@@ -53,7 +52,6 @@ notesRouter.post('/', async (req, res) => {
   }
 });
 
-// DELETE /api/notes/:id - Delete note
 notesRouter.delete('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);

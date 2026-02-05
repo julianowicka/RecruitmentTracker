@@ -22,6 +22,7 @@ export const notes = sqliteTable('notes', {
   applicationId: integer('application_id')
     .notNull()
     .references(() => applications.id, { onDelete: 'cascade' }),
+  category: text('category').notNull().default('general'),
   content: text('content').notNull(),
   createdAt: text('created_at')
     .notNull()
