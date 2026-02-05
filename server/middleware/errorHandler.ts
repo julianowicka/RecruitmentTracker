@@ -15,9 +15,9 @@ export class AppError extends Error {
 
 export function errorHandler(
   err: Error | AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void {
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
@@ -27,7 +27,6 @@ export function errorHandler(
     return;
   }
 
-  // Unexpected errors
   console.error('Unexpected error:', err);
   
   res.status(500).json({
@@ -36,7 +35,6 @@ export function errorHandler(
   });
 }
 
-// Async handler wrapper to catch errors
 export function asyncHandler(
   fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
 ) {
