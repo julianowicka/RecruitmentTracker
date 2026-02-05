@@ -1,6 +1,7 @@
-// HTTP Client - DRY principle for API calls
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+// Use relative URL - Vite proxy will forward /api to backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export class ApiError extends Error {
   constructor(
@@ -33,15 +34,14 @@ class HttpClient {
   ): Promise<T> {
     const { method = 'GET', body, headers = {}, params } = options;
 
-    // Build URL with query params
-    const url = new URL(`${this.baseURL}${endpoint}`);
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, value);
-      });
+    // Build URL string - no need for URL constructor with relative paths
+    let urlString = `${this.baseURL}${endpoint}`;
+    
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams(params);
+      urlString += `?${searchParams.toString()}`;
     }
 
-    // Build request config
     const config: RequestInit = {
       method,
       headers: {
@@ -55,17 +55,14 @@ class HttpClient {
     }
 
     try {
-      const response = await fetch(url.toString(), config);
+      const response = await fetch(urlString, config);
 
-      // Handle 204 No Content
       if (response.status === 204) {
         return undefined as T;
       }
 
-      // Parse JSON response
       const data = await response.json().catch(() => ({}));
 
-      // Handle error responses
       if (!response.ok) {
         throw new ApiError(
           data.message || data.error || 'Request failed',
@@ -80,7 +77,6 @@ class HttpClient {
         throw error;
       }
 
-      // Network or parsing errors
       throw new ApiError(
         error instanceof Error ? error.message : 'Network error',
         0
@@ -109,6 +105,5 @@ class HttpClient {
   }
 }
 
-// Export singleton instance
 export const httpClient = new HttpClient(API_BASE_URL);
 

@@ -1,4 +1,3 @@
-// Frontend API Client - komunikacja z backendem
 import { httpClient } from './httpClient';
 
 export interface Application {
@@ -16,6 +15,7 @@ export interface Application {
 export interface Note {
   id: number;
   applicationId: number;
+  category: string;
   content: string;
   createdAt: string;
 }
@@ -41,7 +41,6 @@ export interface ApplicationStats {
   averageSalary: number | null;
 }
 
-// ============= APPLICATIONS =============
 
 export async function getAllApplications(status?: string): Promise<Application[]> {
   return httpClient.get<Application[]>('/applications', status ? { status } : undefined);
@@ -87,7 +86,6 @@ export async function deleteApplication(id: number): Promise<void> {
   await httpClient.delete(`/applications/${id}`);
 }
 
-// ============= NOTES =============
 
 export async function getNotesByApplicationId(applicationId: number): Promise<Note[]> {
   return httpClient.get<Note[]>('/notes', { applicationId: applicationId.toString() });
@@ -96,6 +94,7 @@ export async function getNotesByApplicationId(applicationId: number): Promise<No
 export async function createNote(data: {
   applicationId: number;
   content: string;
+  category?: string;
 }): Promise<Note> {
   return httpClient.post<Note>('/notes', data);
 }
@@ -104,7 +103,6 @@ export async function deleteNote(id: number): Promise<void> {
   await httpClient.delete(`/notes/${id}`);
 }
 
-// ============= STATUS HISTORY =============
 
 export async function getStatusHistoryByApplicationId(
   applicationId: number
@@ -114,7 +112,6 @@ export async function getStatusHistoryByApplicationId(
   });
 }
 
-// ============= STATISTICS =============
 
 export async function getApplicationStats(): Promise<ApplicationStats> {
   return httpClient.get<ApplicationStats>('/stats');

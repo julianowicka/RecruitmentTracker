@@ -2,6 +2,9 @@ import { Badge } from '../ui/Badge';
 import type { Application } from '../../api/applications';
 import type { ApplicationStatus } from '../../lib/constants';
 import { Link } from '@tanstack/react-router';
+import { Card, CardContent, CardHeader } from '../ui/card';
+import { Button } from '../ui/button';
+import { Building2, Briefcase, DollarSign, Calendar, ExternalLink, Eye, Edit, Trash2 } from 'lucide-react';
 
 interface ApplicationCardProps {
   application: Application;
@@ -14,82 +17,96 @@ export function ApplicationCard({ application, onDelete, onEdit, isDeleting = fa
   const { id, company, role, status, link, salaryMin, salaryMax, createdAt } = application;
 
   return (
-    <div
-      className={`p-6 bg-white rounded-lg shadow-sm border border-gray-200 transition-all duration-200 ${
-        isDeleting ? 'opacity-50' : 'opacity-100'
-      }`}
-    >
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-4 mb-2">
-            <h3 className="m-0 text-xl font-semibold">
-              🏢 {company}
-            </h3>
-            <Badge status={status as ApplicationStatus} />
+    <Card className={`transition-all duration-200 hover:shadow-md ${
+      isDeleting ? 'opacity-50' : 'opacity-100'
+    }`}>
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-3 mb-2">
+              <Building2 className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-xl font-semibold m-0">
+                {company}
+              </h3>
+              <Badge status={status as ApplicationStatus} />
+            </div>
+
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Briefcase className="w-4 h-4" />
+              <span className="font-medium">{role}</span>
+            </div>
           </div>
 
-          <p className="my-2 text-gray-700 text-lg">
-            <strong>{role}</strong>
-          </p>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              disabled={isDeleting}
+            >
+              <Link
+                to="/applications/$id"
+                params={{ id: id.toString() }}
+              >
+                <Eye className="w-4 h-4" />
+                Szczegóły
+              </Link>
+            </Button>
+            <Button
+              onClick={() => onEdit(id)}
+              disabled={isDeleting}
+              variant="default"
+              size="sm"
+            >
+              <Edit className="w-4 h-4" />
+              Edytuj
+            </Button>
+            <Button
+              onClick={() => onDelete(id, company)}
+              disabled={isDeleting}
+              variant="destructive"
+              size="sm"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
 
+      <CardContent className="pt-0">
+        <div className="flex flex-wrap gap-4 text-sm">
           {(salaryMin || salaryMax) && (
-            <p className="my-2 text-gray-500">
-              💰 Widełki: {salaryMin || '?'} - {salaryMax || '?'} PLN
-            </p>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <DollarSign className="w-4 h-4" />
+              <span>
+                {salaryMin && salaryMax
+                  ? `${salaryMin.toLocaleString()} - ${salaryMax.toLocaleString()} PLN`
+                  : salaryMin
+                  ? `od ${salaryMin.toLocaleString()} PLN`
+                  : `do ${salaryMax?.toLocaleString()} PLN`}
+              </span>
+            </div>
           )}
 
           {link && (
-            <p className="my-2">
-              🔗{' '}
-              <a 
-                href={link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-500 no-underline hover:text-blue-700 transition-colors"
-              >
-                Link do ogłoszenia
-              </a>
-            </p>
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-primary hover:underline"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Link do ogłoszenia
+            </a>
           )}
 
-          <p className="mt-2 mb-0 text-gray-400 text-sm">
-            📅 Dodano: {new Date(createdAt).toLocaleDateString('pl-PL')}
-          </p>
+          <div className="flex items-center gap-2 text-muted-foreground ml-auto">
+            <Calendar className="w-4 h-4" />
+            <span>{new Date(createdAt).toLocaleDateString('pl-PL')}</span>
+          </div>
         </div>
-
-        <div className="flex gap-2">
-          <Link
-            to="/applications/$id"
-            params={{ id: id.toString() }}
-            className="px-4 py-2 bg-purple-500 text-white border-none rounded-md text-sm transition-all duration-200 hover:bg-purple-600 flex items-center"
-          >
-            📋 Szczegóły
-          </Link>
-          <button
-            onClick={() => onEdit(id)}
-            disabled={isDeleting}
-            className={`px-4 py-2 bg-blue-500 text-white border-none rounded-md text-sm transition-all duration-200 ${
-              isDeleting 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'opacity-100 cursor-pointer hover:bg-blue-600'
-            }`}
-          >
-            ✏️ Edytuj
-          </button>
-          <button
-            onClick={() => onDelete(id, company)}
-            disabled={isDeleting}
-            className={`px-4 py-2 bg-red-500 text-white border-none rounded-md text-sm transition-opacity duration-200 ${
-              isDeleting 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'opacity-100 cursor-pointer hover:bg-red-600'
-            }`}
-          >
-            🗑️ Usuń
-          </button>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
