@@ -25,3 +25,38 @@ export const STATUS_COLORS: Record<ApplicationStatus, string> = {
   rejected: '#ef4444',
 };
 
+// Note Categories
+export const NOTE_CATEGORIES = {
+  GENERAL: 'general',
+  TECHNICAL: 'technical',
+  COMPANY: 'company',
+  INTERVIEW_PREP: 'interview_prep',
+  FOLLOWUP: 'followup',
+} as const;
+
+export type NoteCategory = typeof NOTE_CATEGORIES[keyof typeof NOTE_CATEGORIES];
+
+export const NOTE_CATEGORY_LABELS: Record<NoteCategory, string> = {
+  general: 'Ogólne',
+  technical: 'Pytania Techniczne',
+  company: 'O Firmie',
+  interview_prep: 'Przygotowanie',
+  followup: 'Follow-up',
+};
+
+export const NOTE_CATEGORY_ICONS: Record<NoteCategory, string> = {
+  general: '📝',
+  technical: '🔧',
+  company: '🏢',
+  interview_prep: '📚',
+  followup: '📧',
+};
+
+export const NOTE_CATEGORY_DESCRIPTIONS: Record<NoteCategory, string> = {
+  general: 'Ogólne notatki o aplikacji',
+  technical: 'Pytania techniczne z rozmów',
+  company: 'Informacje o firmie, kulturze, benefitach',
+  interview_prep: 'Co przygotować, tematy do omówienia',
+  followup: 'Akcje do wykonania po rozmowie',
+};
+
