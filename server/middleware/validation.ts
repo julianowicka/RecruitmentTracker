@@ -10,6 +10,8 @@ export interface CreateApplicationDTO {
   link?: string;
   salaryMin?: number;
   salaryMax?: number;
+  tags?: string;
+  rating?: number;
 }
 
 export interface UpdateApplicationDTO {
@@ -19,6 +21,8 @@ export interface UpdateApplicationDTO {
   link?: string;
   salaryMin?: number;
   salaryMax?: number;
+  tags?: string;
+  rating?: number;
 }
 
 export function validateCreateApplication(
@@ -26,7 +30,7 @@ export function validateCreateApplication(
   res: Response,
   next: NextFunction
 ): void {
-  const { company, role, status, salaryMin, salaryMax } = req.body;
+  const { company, role, status, salaryMin, salaryMax, tags, rating } = req.body;
 
   if (!company || typeof company !== 'string' || company.trim().length === 0) {
     res.status(400).json({ error: 'Company is required and must be a non-empty string' });
@@ -64,6 +68,26 @@ export function validateCreateApplication(
     return;
   }
 
+  // Walidacja tags (musi być JSON array jako string)
+  if (tags !== undefined && typeof tags === 'string') {
+    try {
+      const parsed = JSON.parse(tags);
+      if (!Array.isArray(parsed)) {
+        res.status(400).json({ error: 'tags must be a JSON array' });
+        return;
+      }
+    } catch {
+      res.status(400).json({ error: 'tags must be valid JSON' });
+      return;
+    }
+  }
+
+  // Walidacja rating (1-5)
+  if (rating !== undefined && (typeof rating !== 'number' || rating < 1 || rating > 5)) {
+    res.status(400).json({ error: 'rating must be a number between 1 and 5' });
+    return;
+  }
+
   next();
 }
 
@@ -72,7 +96,7 @@ export function validateUpdateApplication(
   res: Response,
   next: NextFunction
 ): void {
-  const { company, role, status, salaryMin, salaryMax } = req.body;
+  const { company, role, status, salaryMin, salaryMax, tags, rating } = req.body;
 
   if (
     company === undefined &&
@@ -80,7 +104,9 @@ export function validateUpdateApplication(
     status === undefined &&
     salaryMin === undefined &&
     salaryMax === undefined &&
-    req.body.link === undefined
+    req.body.link === undefined &&
+    tags === undefined &&
+    rating === undefined
   ) {
     res.status(400).json({ error: 'At least one field must be provided for update' });
     return;
@@ -110,6 +136,26 @@ export function validateUpdateApplication(
 
   if (salaryMax !== undefined && (typeof salaryMax !== 'number' || salaryMax < 0)) {
     res.status(400).json({ error: 'salaryMax must be a positive number' });
+    return;
+  }
+
+  // Walidacja tags
+  if (tags !== undefined && typeof tags === 'string') {
+    try {
+      const parsed = JSON.parse(tags);
+      if (!Array.isArray(parsed)) {
+        res.status(400).json({ error: 'tags must be a JSON array' });
+        return;
+      }
+    } catch {
+      res.status(400).json({ error: 'tags must be valid JSON' });
+      return;
+    }
+  }
+
+  // Walidacja rating
+  if (rating !== undefined && (typeof rating !== 'number' || rating < 1 || rating > 5)) {
+    res.status(400).json({ error: 'rating must be a number between 1 and 5' });
     return;
   }
 
