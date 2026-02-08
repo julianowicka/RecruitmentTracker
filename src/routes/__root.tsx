@@ -35,8 +35,18 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Skip to content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded"
+      >
+        Przejdź do głównej treści
+      </a>
+      
       <Header />
-      <Outlet />
+      <main id="main-content">
+        <Outlet />
+      </main>
       <ReactQueryDevtools initialIsOpen={false} />
       <TanStackRouterDevtools position="bottom-right" />
     </QueryClientProvider>
