@@ -4,7 +4,8 @@ import type { ApplicationStatus } from '../../lib/constants';
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { Button } from '../ui/button';
-import { Building2, Briefcase, DollarSign, Calendar, ExternalLink, Eye, Edit, Trash2 } from 'lucide-react';
+import { Building2, Briefcase, DollarSign, Calendar, ExternalLink, Eye, Edit, Trash2, Star } from 'lucide-react';
+import { parseTags, getTagColor } from '../../lib/tag-utils';
 
 interface ApplicationCardProps {
   application: Application;
@@ -14,7 +15,8 @@ interface ApplicationCardProps {
 }
 
 export function ApplicationCard({ application, onDelete, onEdit, isDeleting = false }: ApplicationCardProps) {
-  const { id, company, role, status, link, salaryMin, salaryMax, createdAt } = application;
+  const { id, company, role, status, link, salaryMin, salaryMax, createdAt, tags, rating } = application;
+  const parsedTags = parseTags(tags);
 
   return (
     <Card className={`transition-all duration-200 hover:shadow-md ${
@@ -74,6 +76,32 @@ export function ApplicationCard({ application, onDelete, onEdit, isDeleting = fa
       </CardHeader>
 
       <CardContent className="pt-0">
+        {/* Tagi i Rating */}
+        {(parsedTags.length > 0 || rating) && (
+          <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200">
+            {parsedTags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {parsedTags.map((tag, index) => (
+                  <span
+                    key={tag}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getTagColor(tag, index)}`}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {rating && rating > 0 && (
+              <div className="flex items-center gap-1 ml-auto">
+                {Array.from({ length: rating }).map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
+                <span className="text-xs text-gray-600 ml-1">({rating}/5)</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-4 text-sm">
           {(salaryMin || salaryMax) && (
             <div className="flex items-center gap-2 text-muted-foreground">

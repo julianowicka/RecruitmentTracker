@@ -1,8 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useState } from 'react';
 import { createApplicationSchema } from '../../lib/validations';
 import { APPLICATION_STATUSES, STATUS_LABELS } from '../../lib/constants';
+import { PREDEFINED_TAGS, parseTags } from '../../lib/tag-utils';
 import type { Application } from '../../db/schema';
 
 type ApplicationFormData = z.infer<typeof createApplicationSchema>;
@@ -20,6 +22,12 @@ export function ApplicationForm({
   initialData = null,
   mode = 'create'
 }: ApplicationFormProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    initialData?.tags ? parseTags(initialData.tags) : []
+  );
+  const [customTag, setCustomTag] = useState('');
+  const [rating, setRating] = useState<number>(initialData?.rating || 0);
+
   const {
     register,
     handleSubmit,
@@ -38,8 +46,33 @@ export function ApplicationForm({
     },
   });
 
+  const handleFormSubmit = (data: ApplicationFormData) => {
+    onSubmit({
+      ...data,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      rating: rating > 0 ? rating : undefined,
+    } as any);
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const addCustomTag = () => {
+    if (customTag.trim() && !selectedTags.includes(customTag.trim())) {
+      setSelectedTags(prev => [...prev, customTag.trim()]);
+      setCustomTag('');
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag));
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
       <div>
         <label htmlFor="company" className="block mb-2 font-bold">
           Firma *
@@ -153,6 +186,96 @@ export function ApplicationForm({
             <p className="text-red-500 text-sm mt-1">
               {errors.salaryMax.message}
             </p>
+          )}
+        </div>
+      </div>
+
+      {/* Tagi */}
+      <div>
+        <label className="block mb-2 font-bold">🏷️ Tagi</label>
+        
+        {/* Wyświetl wybrane tagi */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {selectedTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="hover:text-red-600 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Predefiniowane tagi */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          {PREDEFINED_TAGS.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggleTag(tag)}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                selectedTags.includes(tag)
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+
+        {/* Własny tag */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={customTag}
+            onChange={(e) => setCustomTag(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustomTag();
+              }
+            }}
+            placeholder="Dodaj własny tag..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          <button
+            type="button"
+            onClick={addCustomTag}
+            className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
+          >
+            + Dodaj
+          </button>
+        </div>
+      </div>
+
+      {/* Rating */}
+      <div>
+        <label className="block mb-2 font-bold">⭐ Ocena firmy/oferty (1-5)</label>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(rating === star ? 0 : star)}
+              className={`text-3xl transition-all ${
+                star <= rating ? 'text-yellow-400' : 'text-gray-300'
+              } hover:scale-110`}
+            >
+              ⭐
+            </button>
+          ))}
+          {rating > 0 && (
+            <span className="ml-2 self-center text-gray-600">({rating}/5)</span>
           )}
         </div>
       </div>
