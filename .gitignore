@@ -36,3 +36,9 @@ drizzle/
 *.swp
 *.swo
 *~
+
+# documentation
+*.md
+
+*storybook.log
+storybook-static
