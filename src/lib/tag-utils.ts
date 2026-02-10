@@ -49,3 +49,4 @@ export function getTagColor(tag: string, index: number): string {
   return TAG_COLORS[hash % TAG_COLORS.length];
 }
 
+

@@ -46,3 +46,4 @@ export const VALIDATION_CONFIG = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 } as const;
 
+
