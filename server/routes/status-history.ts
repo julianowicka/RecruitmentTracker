@@ -5,7 +5,6 @@ import { eq, desc } from 'drizzle-orm';
 
 export const statusHistoryRouter = Router();
 
-// GET /api/status-history?applicationId=X - Get status history for application
 statusHistoryRouter.get('/', async (req, res) => {
   try {
     const { applicationId } = req.query;

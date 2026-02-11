@@ -5,7 +5,6 @@ import * as schema from './schema';
 const sqlite = new Database('sqlite.db');
 export const db = drizzle(sqlite, { schema });
 
-// Initialize tables if they don't exist
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,5 +36,5 @@ sqlite.exec(`
   );
 `);
 
-console.log('✅ Database initialized');
+console.log('Database initialized');
 

@@ -9,7 +9,6 @@ import { asyncHandler, AppError } from '../middleware/errorHandler';
 
 export const applicationsRouter = Router();
 
-// GET /api/applications - List all applications (with optional status filter)
 applicationsRouter.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -21,7 +20,6 @@ applicationsRouter.get(
   })
 );
 
-// GET /api/applications/:id - Get single application
 applicationsRouter.get(
   '/:id',
   validateIdParam,
@@ -37,7 +35,6 @@ applicationsRouter.get(
   })
 );
 
-// POST /api/applications - Create new application
 applicationsRouter.post(
   '/',
   validateCreateApplication,
@@ -57,7 +54,6 @@ applicationsRouter.post(
   })
 );
 
-// PATCH /api/applications/:id - Update application
 applicationsRouter.patch(
   '/:id',
   validateIdParam,
@@ -76,7 +72,6 @@ applicationsRouter.patch(
   })
 );
 
-// DELETE /api/applications/:id - Delete application
 applicationsRouter.delete(
   '/:id',
   validateIdParam,
