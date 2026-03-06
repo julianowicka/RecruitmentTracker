@@ -1,4 +1,6 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
+import { Download, FileText, Braces } from 'lucide-react';
+import { Button } from '../ui/button';
 import type { Application } from '../../api/applications';
 
 interface ExportButtonProps {
@@ -14,11 +16,9 @@ export function ExportButton({ applications }: ExportButtonProps) {
       return;
     }
 
-    // Przygotuj nagłówki
     const headers = ['ID', 'Firma', 'Stanowisko', 'Status', 'Link', 'Pensja Min', 'Pensja Max', 'Data utworzenia', 'Data aktualizacji'];
-    
-    // Przygotuj wiersze
-    const rows = applications.map(app => [
+
+    const rows = applications.map((app) => [
       app.id,
       app.company,
       app.role,
@@ -30,13 +30,8 @@ export function ExportButton({ applications }: ExportButtonProps) {
       new Date(app.updatedAt).toLocaleDateString('pl-PL'),
     ]);
 
-    // Połącz w CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n');
 
-    // Pobierz plik
     downloadFile(csvContent, 'aplikacje.csv', 'text/csv;charset=utf-8;');
     setIsOpen(false);
   };
@@ -66,35 +61,34 @@ export function ExportButton({ applications }: ExportButtonProps) {
 
   return (
     <div className="relative">
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 bg-purple-500 text-white border-none rounded-lg cursor-pointer text-sm font-bold flex items-center gap-2 hover:bg-purple-600 transition-colors"
+        variant="outline"
+        className="h-10 border-2 border-slate-300 bg-white px-4 font-semibold text-slate-900 hover:bg-slate-50"
+        aria-expanded={isOpen}
       >
-        📤 Eksportuj
-      </button>
+        <Download className="h-4 w-4" />
+        Eksportuj
+      </Button>
 
       {isOpen && (
         <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Menu */}
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-20">
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+
+          <div className="absolute right-0 z-20 mt-2 w-52 rounded-xl border border-slate-300 bg-white p-1 shadow-lg">
             <button
               onClick={exportToCSV}
-              className="w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2 text-gray-700"
+              className="flex w-full items-center gap-2 rounded-lg border border-transparent bg-white px-3 py-2 text-left text-sm font-medium text-slate-900 transition-colors hover:border-slate-300 hover:bg-slate-50"
             >
-              📊 Eksportuj do CSV
+              <FileText className="h-4 w-4 text-slate-600" />
+              Eksportuj do CSV
             </button>
-            <div className="border-t border-gray-200" />
             <button
               onClick={exportToJSON}
-              className="w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2 text-gray-700"
+              className="flex w-full items-center gap-2 rounded-lg border border-transparent bg-white px-3 py-2 text-left text-sm font-medium text-slate-900 transition-colors hover:border-slate-300 hover:bg-slate-50"
             >
-              📦 Eksportuj do JSON
+              <Braces className="h-4 w-4 text-slate-600" />
+              Eksportuj do JSON
             </button>
           </div>
         </>
@@ -102,5 +96,3 @@ export function ExportButton({ applications }: ExportButtonProps) {
     </div>
   );
 }
-
-
