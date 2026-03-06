@@ -51,18 +51,19 @@
   * {
     border-color: hsl(var(--border));
   }
+
   body {
-    background-color: hsl(var(--background));
+    background:
+      radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.08), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(52, 211, 153, 0.09), transparent 38%),
+      hsl(var(--background));
     color: hsl(var(--foreground));
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-      sans-serif;
+    font-family: "Manrope", "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Screen reader only utility */
   .sr-only {
     position: absolute;
     width: 1px;
@@ -75,7 +76,6 @@
     border-width: 0;
   }
 
-  /* Remove sr-only on focus */
   .focus\:not-sr-only:focus {
     position: static;
     width: auto;
@@ -89,6 +89,21 @@
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
 }
