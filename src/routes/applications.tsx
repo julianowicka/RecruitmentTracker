@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+﻿import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
+import { Search, Calendar, Building2, BarChart3, ClipboardList, Info, Plus } from 'lucide-react';
 import { useApplications } from '../hooks/queries/useApplications';
 import { useApplication } from '../hooks/queries/useApplication';
 import { useDeleteApplication, useCreateApplication, useUpdateApplication } from '../hooks/queries/useApplicationMutations';
@@ -9,6 +10,7 @@ import { SkeletonCards } from '../components/applications/SkeletonCards';
 import { ApplicationForm } from '../components/applications/ApplicationForm';
 import { ExportButton } from '../components/applications/ExportButton';
 import { Modal } from '../components/ui/Modal';
+import { Button } from '../components/ui/button';
 import { useUIStore } from '../stores/ui-store';
 import { APPLICATION_STATUSES } from '../lib/constants';
 
@@ -40,10 +42,10 @@ function ApplicationsPage() {
   const deleteMutation = useDeleteApplication();
   const createMutation = useCreateApplication();
   const updateMutation = useUpdateApplication();
-  
-  const { 
-    isCreateModalOpen, 
-    openCreateModal, 
+
+  const {
+    isCreateModalOpen,
+    openCreateModal,
     closeCreateModal,
     isEditModalOpen,
     editingApplicationId,
@@ -69,10 +71,10 @@ function ApplicationsPage() {
 
   const handleSortChange = (newSortBy: 'date' | 'company' | 'status') => {
     navigate({
-      search: (prev) => ({ 
-        ...prev, 
+      search: (prev) => ({
+        ...prev,
         sortBy: newSortBy,
-        sortOrder: prev.sortBy === newSortBy && prev.sortOrder === 'desc' ? 'asc' : 'desc'
+        sortOrder: prev.sortBy === newSortBy && prev.sortOrder === 'desc' ? 'asc' : 'desc',
       }),
     });
   };
@@ -97,7 +99,7 @@ function ApplicationsPage() {
 
   const handleUpdateApplication = (data: any) => {
     if (!editingApplicationId) return;
-    
+
     updateMutation.mutate(
       { id: editingApplicationId, data },
       {
@@ -108,115 +110,118 @@ function ApplicationsPage() {
     );
   };
 
-  // Filtrowanie po wyszukiwanej frazie
   let filteredApplications = applications || [];
-  
+
   if (search) {
     const searchLower = search.toLowerCase();
     filteredApplications = filteredApplications.filter((app) =>
-      app.company.toLowerCase().includes(searchLower) ||
-      app.role.toLowerCase().includes(searchLower)
+      app.company.toLowerCase().includes(searchLower) || app.role.toLowerCase().includes(searchLower)
     );
   }
 
-  // Sortowanie
   filteredApplications = [...filteredApplications].sort((a, b) => {
     let comparison = 0;
-    
+
     if (sortBy === 'company') {
       comparison = a.company.localeCompare(b.company);
     } else if (sortBy === 'status') {
       comparison = a.status.localeCompare(b.status);
     } else {
-      // sortBy === 'date' (domyślnie)
       comparison = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
-    
+
     return sortOrder === 'asc' ? -comparison : comparison;
   });
 
-  // Dla counts musimy pobrać wszystkie aplikacje (bez filtra)
   const { data: allApplications } = useApplications();
-  const statusCounts = allApplications?.reduce((acc, app) => {
-    acc[app.status] = (acc[app.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>) || {};
+  const statusCounts =
+    allApplications?.reduce((acc, app) => {
+      acc[app.status] = (acc[app.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>) || {};
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">📋 Moje Aplikacje</h1>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-col gap-4 border-b border-slate-300 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="flex items-center gap-2 text-3xl font-semibold tracking-tight text-slate-900">
+            <ClipboardList className="h-7 w-7 text-slate-700" />
+            Moje Aplikacje
+          </h1>
+          <p className="text-sm text-slate-700">Przeglądaj, filtruj i zarządzaj procesami rekrutacyjnymi.</p>
+        </div>
         <div className="flex gap-3">
           <ExportButton applications={filteredApplications} />
-          <button
-            onClick={openCreateModal}
-            className="px-6 py-3 bg-emerald-500 text-white border-none rounded-lg cursor-pointer text-base font-bold flex items-center gap-2 hover:bg-emerald-600 transition-colors"
-          >
-            ➕ Dodaj aplikację
-          </button>
+          <Button onClick={openCreateModal} className="h-10 px-4 font-semibold">
+            <Plus className="h-4 w-4" />
+            Dodaj aplikację
+          </Button>
         </div>
       </div>
 
-      {/* Wyszukiwarka + Sortowanie */}
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1">
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row">
+        <div className="relative flex-1">
           <label htmlFor="search-applications" className="sr-only">
             Wyszukaj aplikacje po firmie lub stanowisku
           </label>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
           <input
             id="search-applications"
             type="text"
-            placeholder="🔍 Szukaj po firmie lub stanowisku..."
+            placeholder="Szukaj po firmie lub stanowisku..."
             value={search || ''}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:border-blue-500 focus:outline-none"
+            className="h-11 w-full rounded-xl border-2 border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
             aria-label="Wyszukiwarka aplikacji"
           />
         </div>
-        
-        <div className="flex gap-2" role="group" aria-label="Opcje sortowania">
+
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label="Opcje sortowania">
           <button
             onClick={() => handleSortChange('date')}
-            className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+            className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-medium transition-colors ${
               sortBy === 'date'
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-white border-gray-300 hover:border-blue-300'
+                ? 'border-blue-700 bg-blue-700 text-white'
+                : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50'
             }`}
             aria-label={`Sortuj po dacie ${sortBy === 'date' ? (sortOrder === 'desc' ? 'malejąco' : 'rosnąco') : ''}`}
             aria-pressed={sortBy === 'date'}
           >
-            📅 Data {sortBy === 'date' && (sortOrder === 'desc' ? '↓' : '↑')}
+            <Calendar className="h-4 w-4" />
+            Data {sortBy === 'date' && (sortOrder === 'desc' ? '↓' : '↑')}
           </button>
           <button
             onClick={() => handleSortChange('company')}
-            className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+            className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-medium transition-colors ${
               sortBy === 'company'
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-white border-gray-300 hover:border-blue-300'
+                ? 'border-blue-700 bg-blue-700 text-white'
+                : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50'
             }`}
             aria-label={`Sortuj po firmie ${sortBy === 'company' ? (sortOrder === 'desc' ? 'malejąco' : 'rosnąco') : ''}`}
             aria-pressed={sortBy === 'company'}
           >
-            🏢 Firma {sortBy === 'company' && (sortOrder === 'desc' ? '↓' : '↑')}
+            <Building2 className="h-4 w-4" />
+            Firma {sortBy === 'company' && (sortOrder === 'desc' ? '↓' : '↑')}
           </button>
           <button
             onClick={() => handleSortChange('status')}
-            className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+            className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-medium transition-colors ${
               sortBy === 'status'
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-white border-gray-300 hover:border-blue-300'
+                ? 'border-blue-700 bg-blue-700 text-white'
+                : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50'
             }`}
             aria-label={`Sortuj po statusie ${sortBy === 'status' ? (sortOrder === 'desc' ? 'malejąco' : 'rosnąco') : ''}`}
             aria-pressed={sortBy === 'status'}
           >
-            📊 Status {sortBy === 'status' && (sortOrder === 'desc' ? '↓' : '↑')}
+            <BarChart3 className="h-4 w-4" />
+            Status {sortBy === 'status' && (sortOrder === 'desc' ? '↓' : '↑')}
           </button>
         </div>
       </div>
 
-      <div className="px-4 py-2 bg-sky-100 rounded-lg text-sm mb-6">
+      <div className="mb-6 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800">
         Znaleziono: <strong>{filteredApplications.length}</strong> aplikacji
-        {search && <span className="ml-2 text-gray-600">(wyszukiwanie: "{search}")</span>}
+        {search && <span className="ml-2 text-slate-700">(wyszukiwanie: "{search}")</span>}
       </div>
 
       <Modal isOpen={isCreateModalOpen} onClose={closeCreateModal} title="Dodaj nową aplikację">
@@ -224,38 +229,32 @@ function ApplicationsPage() {
       </Modal>
 
       <Modal isOpen={isEditModalOpen} onClose={closeEditModal} title="Edytuj aplikację">
-        <ApplicationForm 
-          onSubmit={handleUpdateApplication} 
+        <ApplicationForm
+          onSubmit={handleUpdateApplication}
           isSubmitting={updateMutation.isPending}
           initialData={editingApplication || null}
           mode="edit"
         />
       </Modal>
 
-      <StatusFilter 
-        activeStatus={status || null} 
-        onStatusChange={handleStatusChange}
-        counts={statusCounts}
-      />
+      <StatusFilter activeStatus={status || null} onStatusChange={handleStatusChange} counts={statusCounts} />
 
       {isLoading && <SkeletonCards count={3} />}
 
       {error && (
-        <div className="p-8 bg-red-100 rounded-lg border-2 border-red-500">
-          <h3 className="text-red-900 mt-0">❌ Błąd</h3>
+        <div className="rounded-xl border-2 border-red-300 bg-red-50 p-8">
+          <h3 className="mt-0 text-red-800">Błąd</h3>
           <p className="text-red-800">{error.message}</p>
         </div>
       )}
 
       {!isLoading && !error && filteredApplications.length === 0 && (
-        <div className="p-12 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-          <p className="text-5xl mb-4">📭</p>
-          <h3 className="text-xl font-semibold mb-2">Brak aplikacji</h3>
-          <p className="text-gray-600">
-            {status 
-              ? `Brak aplikacji ze statusem "${status}". Spróbuj innego filtra!`
-              : 'Dodaj swoją pierwszą aplikację o pracę!'
-            }
+        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
+          <h3 className="mb-2 text-xl font-semibold text-slate-900">Brak aplikacji</h3>
+          <p className="text-slate-700">
+            {status
+              ? `Brak aplikacji ze statusem "${status}". Spróbuj innego filtra.`
+              : 'Dodaj swoją pierwszą aplikację o pracę.'}
           </p>
         </div>
       )}
@@ -275,13 +274,13 @@ function ApplicationsPage() {
         </div>
       )}
 
-      <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-300">
-        <p className="m-0 text-sm">
-          ✅ <strong>Filtrowanie </strong> TanStack Query cachuje dane osobno dla każdego statusu!
+      <div className="mt-8 rounded-xl border border-slate-300 bg-white p-4">
+        <p className="m-0 flex items-center gap-2 text-sm text-slate-800">
+          <Info className="h-4 w-4" />
+          <strong className="text-slate-900">Filtrowanie:</strong>
+          TanStack Query cachuje dane osobno dla każdego statusu.
         </p>
       </div>
     </div>
   );
 }
-
-
