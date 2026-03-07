@@ -1,17 +1,24 @@
 import { QueryClient } from '@tanstack/react-query';
+import { ApiError } from '@/api/httpClient';
+
+const isDev = import.meta.env.DEV;
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000,
-      
       gcTime: 5 * 60 * 1000,
-      
       refetchOnWindowFocus: true,
-      
-      retry: 1,
-      
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retry: (failureCount: number, error: unknown) => {
+        const apiError = error as ApiError;
+
+        if (apiError?.status === 0) {
+          return failureCount < (isDev ? 8 : 2);
+        }
+
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000),
     },
     mutations: {
       retry: false,

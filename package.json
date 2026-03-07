@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "dev:server": "tsx watch server/index.ts",
-    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev\"",
+    "dev:client": "vite dev --port 3000",
+    "dev:all": "concurrently \"npm run dev:server\" \"npx wait-on http://localhost:3001/api/health && npm run dev:client\"",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -90,6 +91,7 @@
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.24",
     "concurrently": "^9.2.1",
+    "wait-on": "^8.0.1",
     "drizzle-kit": "^0.31.8",
     "jsdom": "^27.4.0",
     "playwright": "^1.58.2",

@@ -6,9 +6,5 @@ export function useApplicationStats() {
   return useQuery({
     queryKey: queryKeys.applications.stats(),
     queryFn: () => api.getApplicationStats(),
-    staleTime: 60 * 1000, 
   });
 }
-
-
-

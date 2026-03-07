@@ -6,9 +6,5 @@ export function useStatusHistory(applicationId: number) {
   return useQuery({
     queryKey: queryKeys.statusHistory.list(applicationId),
     queryFn: () => api.getStatusHistoryByApplicationId(applicationId),
-    staleTime: 30 * 1000,
   });
 }
-
-
-
