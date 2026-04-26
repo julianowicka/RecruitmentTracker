@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'url'
 
@@ -19,6 +20,11 @@ const config = defineConfig({
     },
   },
   plugins: [
+    tanstackRouter({
+      target: 'react',
+      routesDirectory: './src/routes',
+      generatedRouteTree: './src/routeTree.gen.ts',
+    }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],

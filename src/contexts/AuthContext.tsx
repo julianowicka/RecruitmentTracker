@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load token from localStorage
     const storedToken = localStorage.getItem(AUTH_CONFIG.TOKEN_KEY);
     if (storedToken) {
       setToken(storedToken);
@@ -46,12 +45,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setUser(data.user);
       } else {
-        // Invalid token
         localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
         setToken(null);
+        setUser(null);
       }
     } catch (error) {
       console.error('Failed to fetch user:', error);
+      localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
+      setToken(null);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -63,12 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+      throw new Error(await getAuthErrorMessage(response, 'Logowanie nie powiodlo sie'));
     }
 
     const data = await response.json();
@@ -83,12 +84,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        password,
+        name: name.trim(),
+      }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Registration failed');
+      throw new Error(await getAuthErrorMessage(response, 'Rejestracja nie powiodla sie'));
     }
 
     const data = await response.json();
@@ -118,3 +122,11 @@ export function useAuth() {
   return context;
 }
 
+async function getAuthErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = await response.json();
+    return data.error || data.message || fallback;
+  } catch {
+    return fallback;
+  }
+}

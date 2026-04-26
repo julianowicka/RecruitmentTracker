@@ -17,7 +17,7 @@ function getCorsOrigins(): string[] {
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const IS_PRODUCTION = NODE_ENV === 'production';
 const CORS_ORIGINS = getCorsOrigins();
-const JWT_SECRET = process.env.JWT_SECRET?.trim() || '';
+const JWT_SECRET = process.env.JWT_SECRET?.trim() || (IS_PRODUCTION ? '' : 'local-development-secret');
 
 export const SERVER_CONFIG = {
   PORT: process.env.PORT || 3001,
@@ -64,7 +64,7 @@ export const AUTH_CONFIG = {
 } as const;
 
 export function validateServerConfig(): void {
-  if (!JWT_CONFIG.SECRET) {
+  if (IS_PRODUCTION && !JWT_CONFIG.SECRET) {
     throw new Error('Missing required environment variable: JWT_SECRET');
   }
 

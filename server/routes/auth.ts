@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { authService } from '../services/auth.service';
-import { asyncHandler } from '../middleware/errorHandler';
+import { AppError, asyncHandler } from '../middleware/errorHandler';
 import { authLimiter } from '../middleware/rateLimit';
-import { AUTH_CONFIG } from '../lib/config';
+import { AUTH_CONFIG, VALIDATION_CONFIG } from '../lib/config';
 
 export const authRouter = Router();
 
@@ -13,9 +13,16 @@ authRouter.post(
   '/register',
   asyncHandler(async (req, res) => {
     const { email, password, name } = req.body;
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const normalizedName = typeof name === 'string' ? name.trim() : '';
 
-    if (!email || !password || !name) {
+    if (!normalizedEmail || !password || !normalizedName) {
       res.status(400).json({ error: 'Email, password, and name are required' });
+      return;
+    }
+
+    if (!VALIDATION_CONFIG.EMAIL_REGEX.test(normalizedEmail)) {
+      res.status(400).json({ error: 'Invalid email address' });
       return;
     }
 
@@ -24,7 +31,7 @@ authRouter.post(
       return;
     }
 
-    const result = await authService.register({ email, password, name });
+    const result = await authService.register({ email: normalizedEmail, password, name: normalizedName });
     res.status(201).json(result);
   })
 );
@@ -33,14 +40,19 @@ authRouter.post(
   '/login',
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
-    const result = await authService.login(email, password);
-    res.json(result);
+    try {
+      const result = await authService.login(normalizedEmail, password);
+      res.json(result);
+    } catch {
+      throw new AppError('Invalid email or password', 401);
+    }
   })
 );
 
@@ -66,4 +78,3 @@ authRouter.get(
     res.json({ user });
   })
 );
-

@@ -19,6 +19,7 @@ import { Button } from '../components/ui/button';
 import { KpiCard } from '../components/dashboard/KpiCard';
 import { StatusDistributionBars } from '../components/dashboard/StatusDistributionBars';
 import { ActionCenterCard } from '../components/dashboard/ActionCenterCard';
+import { RequireAuth } from '../components/auth/RequireAuth';
 
 const ApplicationsTrendChart = lazy(() =>
   import('../components/charts/ApplicationsTrendChart').then((m) => ({ default: m.ApplicationsTrendChart }))
@@ -60,6 +61,14 @@ export const Route = createFileRoute('/dashboard')({
 });
 
 function DashboardPage() {
+  return (
+    <RequireAuth>
+      <DashboardContent />
+    </RequireAuth>
+  );
+}
+
+function DashboardContent() {
   const [timeRange, setTimeRange] = useState<TimeRangeKey>('all');
   const { data: applications, isLoading, isError, error, refetch, isFetching } = useApplications();
 

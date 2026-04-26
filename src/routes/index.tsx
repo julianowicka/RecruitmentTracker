@@ -8,6 +8,7 @@ import {
   NotebookPen,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -41,6 +42,10 @@ const features: { icon: LucideIcon; title: string; description: string; tone: st
 ];
 
 function Home() {
+  const { user } = useAuth();
+  const primaryTarget = user ? '/applications' : '/auth';
+  const secondaryTarget = user ? '/dashboard' : '/auth';
+
   return (
     <section className="relative overflow-hidden px-6 py-12 md:px-10 md:py-16">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -65,17 +70,17 @@ function Home() {
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                to="/applications"
+                to={primaryTarget}
                 className="group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white no-underline shadow-lg shadow-slate-900/20 transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800"
               >
-                Przejdz do aplikacji
+                {user ? 'Przejdz do aplikacji' : 'Zacznij od konta'}
                 <ChevronRight size={18} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
-                to="/dashboard"
+                to={secondaryTarget}
                 className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 no-underline transition duration-300 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50"
               >
-                Otworz dashboard
+                {user ? 'Otworz dashboard' : 'Zaloguj sie'}
               </Link>
             </div>
           </div>

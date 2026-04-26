@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
@@ -17,6 +18,11 @@ import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplicationsRoute = ApplicationsRouteImport.update({
@@ -38,12 +44,14 @@ const ApplicationsIdRoute = ApplicationsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRouteWithChildren
+  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/applications/$id': typeof ApplicationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRouteWithChildren
+  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/applications/$id': typeof ApplicationsIdRoute
 }
@@ -51,20 +59,33 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRouteWithChildren
+  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/applications/$id': typeof ApplicationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/applications' | '/dashboard' | '/applications/$id'
+  fullPaths:
+    | '/'
+    | '/applications'
+    | '/auth'
+    | '/dashboard'
+    | '/applications/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/applications' | '/dashboard' | '/applications/$id'
-  id: '__root__' | '/' | '/applications' | '/dashboard' | '/applications/$id'
+  to: '/' | '/applications' | '/auth' | '/dashboard' | '/applications/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/applications'
+    | '/auth'
+    | '/dashboard'
+    | '/applications/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApplicationsRoute: typeof ApplicationsRouteWithChildren
+  AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
 }
 
@@ -75,6 +96,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/applications': {
@@ -116,17 +144,9 @@ const ApplicationsRouteWithChildren = ApplicationsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApplicationsRoute: ApplicationsRouteWithChildren,
+  AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

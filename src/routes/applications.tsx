@@ -13,6 +13,7 @@ import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { useUIStore } from '../stores/ui-store';
 import { APPLICATION_STATUSES } from '../lib/constants';
+import { RequireAuth } from '../components/auth/RequireAuth';
 
 const applicationsSearchSchema = z.object({
   status: z
@@ -36,6 +37,14 @@ export const Route = createFileRoute('/applications')({
 });
 
 function ApplicationsPage() {
+  return (
+    <RequireAuth>
+      <ApplicationsContent />
+    </RequireAuth>
+  );
+}
+
+function ApplicationsContent() {
   const navigate = Route.useNavigate();
   const { status, search, sortBy, sortOrder } = Route.useSearch();
   const { data: applications, isLoading, error } = useApplications(status);

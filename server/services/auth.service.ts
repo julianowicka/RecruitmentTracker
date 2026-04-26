@@ -5,6 +5,7 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { InsertUser } from '../db/schema';
 import { JWT_CONFIG, BCRYPT_CONFIG } from '../lib/config';
+import { AppError } from '../middleware/errorHandler';
 
 /**
  * Service for user authentication and authorization
@@ -26,7 +27,7 @@ export class AuthService {
       .limit(1);
 
     if (existing.length > 0) {
-      throw new Error('User already exists');
+      throw new AppError('User already exists', 409);
     }
 
     // Hash password
@@ -126,4 +127,3 @@ export class AuthService {
 }
 
 export const authService = new AuthService();
-

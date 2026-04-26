@@ -6,11 +6,20 @@ import { ArrowLeft, ExternalLink, DollarSign, Calendar, Briefcase, Building } fr
 import { STATUS_LABELS, STATUS_COLORS } from '../lib/constants';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { RequireAuth } from '../components/auth/RequireAuth';
 export const Route = createFileRoute('/applications/$id')({
   component: ApplicationDetailPage,
 });
 
 function ApplicationDetailPage() {
+  return (
+    <RequireAuth>
+      <ApplicationDetailContent />
+    </RequireAuth>
+  );
+}
+
+function ApplicationDetailContent() {
   const { id } = Route.useParams();
   const appId = parseInt(id, 10);
   const { data: application, isLoading, error } = useApplication(appId);
