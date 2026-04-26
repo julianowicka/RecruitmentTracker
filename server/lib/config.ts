@@ -1,13 +1,34 @@
 
+function getCorsOrigins(): string[] {
+  const configuredOrigins = process.env.CORS_ORIGINS
+    ?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean) ?? [];
+
+  const frontendUrl = process.env.FRONTEND_URL?.trim();
+
+  if (frontendUrl) {
+    configuredOrigins.push(frontendUrl);
+  }
+
+  return [...new Set(configuredOrigins)];
+}
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PRODUCTION = NODE_ENV === 'production';
+const CORS_ORIGINS = getCorsOrigins();
+const JWT_SECRET = process.env.JWT_SECRET?.trim() || '';
 
 export const SERVER_CONFIG = {
   PORT: process.env.PORT || 3001,
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  NODE_ENV,
+  IS_PRODUCTION,
+  DATABASE_URL: process.env.DATABASE_URL || './sqlite.db',
+  CORS_ORIGINS,
 } as const;
 
 export const JWT_CONFIG = {
-  SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+  SECRET: JWT_SECRET,
   EXPIRES_IN: '7d',
   ALGORITHM: 'HS256',
 } as const;
@@ -41,3 +62,13 @@ export const VALIDATION_CONFIG = {
 export const AUTH_CONFIG = {
   PASSWORD_MIN_LENGTH: VALIDATION_CONFIG.PASSWORD_MIN_LENGTH,
 } as const;
+
+export function validateServerConfig(): void {
+  if (!JWT_CONFIG.SECRET) {
+    throw new Error('Missing required environment variable: JWT_SECRET');
+  }
+
+  if (IS_PRODUCTION && CORS_ORIGINS.length === 0) {
+    throw new Error('Set FRONTEND_URL or CORS_ORIGINS in production');
+  }
+}

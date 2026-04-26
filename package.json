@@ -8,6 +8,7 @@
     "dev:client": "vite dev --port 3000",
     "dev:all": "concurrently \"npm run dev:server\" \"npx wait-on http://localhost:3001/api/health && npm run dev:client\"",
     "build": "vite build",
+    "start": "tsx server/index.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

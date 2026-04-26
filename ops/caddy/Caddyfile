@@ -1,0 +1,3 @@
+{$RECRUITMENT_HOST} {
+	reverse_proxy recruitment-tracker:3001
+}

@@ -1,24 +1,37 @@
-version: '3.8'
-
 services:
-  app:
+  recruitment-tracker:
+    container_name: recruitment-tracker
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"  # Frontend
-      - "3001:3001"  # Backend
     volumes:
-      - ./sqlite.db:/app/sqlite.db
-      - ./drizzle:/app/drizzle
+      - recruitment_tracker_data:/app/data
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: /app/data/sqlite.db
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     restart: unless-stopped
+    expose:
+      - "3001"
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/stats', (r) => { if (r.statusCode !== 200) throw new Error('unhealthy'); })"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3001/api/health', (r) => { if (r.statusCode !== 200) throw new Error('unhealthy'); })"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 20s
+    networks:
+      - web
+
+volumes:
+  recruitment_tracker_data:
+    name: recruitment_tracker_data
+
+networks:
+  web:
+    external: true
 
 

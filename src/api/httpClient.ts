@@ -1,4 +1,6 @@
 
+import { AUTH_CONFIG } from '../lib/config';
+
 
 // Use relative URL - Vite proxy will forward /api to backend
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -46,6 +48,7 @@ class HttpClient {
       method,
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
         ...headers,
       },
     };
@@ -84,6 +87,22 @@ class HttpClient {
     }
   }
 
+  private getAuthHeader(): Record<string, string> {
+    if (typeof window === 'undefined') {
+      return {};
+    }
+
+    const token = window.localStorage.getItem(AUTH_CONFIG.TOKEN_KEY);
+
+    if (!token) {
+      return {};
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET', params });
   }
@@ -106,4 +125,3 @@ class HttpClient {
 }
 
 export const httpClient = new HttpClient(API_BASE_URL);
-

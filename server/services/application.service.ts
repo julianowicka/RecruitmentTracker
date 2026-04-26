@@ -1,7 +1,7 @@
 
 import { db } from '../db';
 import { applications, statusHistory } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import type { Application, InsertApplication } from '../db/schema';
 
 /**
@@ -14,18 +14,19 @@ export class ApplicationService {
    * @param statusFilter - Optional status to filter by (e.g., 'applied', 'interview')
    * @returns Promise resolving to array of applications
    */
-  async getAll(statusFilter?: string): Promise<Application[]> {
+  async getAll(userId: number, statusFilter?: string): Promise<Application[]> {
     if (statusFilter) {
       return await db
         .select()
         .from(applications)
-        .where(eq(applications.status, statusFilter))
+        .where(and(eq(applications.userId, userId), eq(applications.status, statusFilter)))
         .orderBy(desc(applications.createdAt));
     }
 
     return await db
       .select()
       .from(applications)
+      .where(eq(applications.userId, userId))
       .orderBy(desc(applications.createdAt));
   }
 
@@ -34,11 +35,11 @@ export class ApplicationService {
    * @param id - Application ID
    * @returns Promise resolving to application or null if not found
    */
-  async getById(id: number): Promise<Application | null> {
+  async getById(id: number, userId: number): Promise<Application | null> {
     const result = await db
       .select()
       .from(applications)
-      .where(eq(applications.id, id))
+      .where(and(eq(applications.id, id), eq(applications.userId, userId)))
       .limit(1);
 
     return result[0] || null;
@@ -50,11 +51,17 @@ export class ApplicationService {
    * @param data - Application data (without timestamps)
    * @returns Promise resolving to created application
    */
-  async create(data: Omit<InsertApplication, 'createdAt' | 'updatedAt'>): Promise<Application> {
+  async create(
+    userId: number,
+    data: Omit<InsertApplication, 'createdAt' | 'updatedAt' | 'userId'>
+  ): Promise<Application> {
     const result = await db.transaction(async (tx) => {
       const [newApp] = await tx
         .insert(applications)
-        .values(data)
+        .values({
+          ...data,
+          userId,
+        })
         .returning();
 
       await tx.insert(statusHistory).values({
@@ -78,9 +85,10 @@ export class ApplicationService {
    */
   async update(
     id: number,
-    data: Partial<Omit<InsertApplication, 'id' | 'createdAt'>>
+    userId: number,
+    data: Partial<Omit<InsertApplication, 'id' | 'createdAt' | 'userId'>>
   ): Promise<Application | null> {
-    const current = await this.getById(id);
+    const current = await this.getById(id, userId);
     
     if (!current) {
       return null;
@@ -90,7 +98,7 @@ export class ApplicationService {
       const [updated] = await tx
         .update(applications)
         .set(data)
-        .where(eq(applications.id, id))
+        .where(and(eq(applications.id, id), eq(applications.userId, userId)))
         .returning();
 
       if (data.status && data.status !== current.status) {
@@ -112,10 +120,10 @@ export class ApplicationService {
    * @param id - Application ID to delete
    * @returns Promise resolving to true if deleted, false if not found
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number, userId: number): Promise<boolean> {
     const result = await db
       .delete(applications)
-      .where(eq(applications.id, id));
+      .where(and(eq(applications.id, id), eq(applications.userId, userId)));
 
     return result.changes > 0;
   }
@@ -130,8 +138,8 @@ export class ApplicationService {
    *   - successRate: Percentage of successful outcomes
    *   - averageRecruitmentTime: Average days from applied to offer
    */
-  async getStats() {
-    const allApps = await this.getAll();
+  async getStats(userId: number) {
+    const allApps = await this.getAll(userId);
 
     const byStatus = {
       applied: 0,
@@ -199,4 +207,3 @@ export class ApplicationService {
 }
 
 export const applicationService = new ApplicationService();
-

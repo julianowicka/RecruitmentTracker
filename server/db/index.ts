@@ -1,9 +1,23 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from './schema';
+import { SERVER_CONFIG } from '../lib/config';
 
-const sqlite = new Database('sqlite.db');
+const databasePath = SERVER_CONFIG.DATABASE_URL;
+const databaseDirectory = path.dirname(databasePath);
+
+if (databasePath !== ':memory:' && databaseDirectory !== '.') {
+  fs.mkdirSync(databaseDirectory, { recursive: true });
+}
+
+const sqlite = new Database(databasePath);
 export const db = drizzle(sqlite, { schema });
+
+sqlite.pragma('foreign_keys = ON');
+sqlite.pragma('journal_mode = WAL');
+sqlite.pragma('busy_timeout = 5000');
 
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -16,7 +30,7 @@ sqlite.exec(`
 
   CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     company TEXT NOT NULL,
     role TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'applied',
