@@ -50,9 +50,29 @@ authRouter.post(
     try {
       const result = await authService.login(normalizedEmail, password);
       res.json(result);
-    } catch {
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
       throw new AppError('Invalid email or password', 401);
     }
+  })
+);
+
+authRouter.post(
+  '/verify-email',
+  asyncHandler(async (req, res) => {
+    const { token } = req.body;
+    const normalizedToken = typeof token === 'string' ? token.trim() : '';
+
+    if (!normalizedToken) {
+      res.status(400).json({ error: 'Verification token is required' });
+      return;
+    }
+
+    const result = await authService.verifyEmail(normalizedToken);
+    res.json(result);
   })
 );
 

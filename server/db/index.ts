@@ -25,6 +25,9 @@ sqlite.exec(`
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     name TEXT NOT NULL,
+    email_verified_at TEXT,
+    email_verification_token TEXT,
+    email_verification_expires_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -82,6 +85,19 @@ if (!hasColumn('applications', 'rating')) {
 
 if (!hasColumn('applications', 'user_id')) {
   sqlite.exec('ALTER TABLE applications ADD COLUMN user_id INTEGER;');
+}
+
+if (!hasColumn('users', 'email_verified_at')) {
+  sqlite.exec('ALTER TABLE users ADD COLUMN email_verified_at TEXT;');
+  sqlite.exec('UPDATE users SET email_verified_at = COALESCE(created_at, CURRENT_TIMESTAMP) WHERE email_verified_at IS NULL;');
+}
+
+if (!hasColumn('users', 'email_verification_token')) {
+  sqlite.exec('ALTER TABLE users ADD COLUMN email_verification_token TEXT;');
+}
+
+if (!hasColumn('users', 'email_verification_expires_at')) {
+  sqlite.exec('ALTER TABLE users ADD COLUMN email_verification_expires_at TEXT;');
 }
 
 if (!hasColumn('notes', 'category')) {

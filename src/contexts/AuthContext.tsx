@@ -5,13 +5,15 @@ interface User {
   id: number;
   email: string;
   name: string;
+  emailVerifiedAt?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<string>;
+  verifyEmail: (token: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -96,6 +98,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = await response.json();
+    return data.message || 'Konto utworzone. Sprawdz email i potwierdz adres.';
+  };
+
+  const verifyEmail = async (verificationToken: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH}/verify-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: verificationToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await getAuthErrorMessage(response, 'Potwierdzenie emaila nie powiodlo sie'));
+    }
+
+    const data = await response.json();
     setUser(data.user);
     setToken(data.token);
     localStorage.setItem(AUTH_CONFIG.TOKEN_KEY, data.token);
@@ -108,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, register, verifyEmail, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -71,9 +71,10 @@ function Home() {
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 to={primaryTarget}
+                search={user ? undefined : { mode: 'register' }}
                 className="group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white no-underline shadow-lg shadow-slate-900/20 transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800"
               >
-                {user ? 'Przejdz do aplikacji' : 'Zacznij od konta'}
+                {user ? 'Przejdz do aplikacji' : 'Załóż konto'}
                 <ChevronRight size={18} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link

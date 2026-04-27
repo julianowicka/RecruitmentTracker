@@ -1,11 +1,15 @@
+import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { db } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { InsertUser } from '../db/schema';
-import { JWT_CONFIG, BCRYPT_CONFIG } from '../lib/config';
+import { JWT_CONFIG, BCRYPT_CONFIG, EMAIL_CONFIG, SERVER_CONFIG } from '../lib/config';
 import { AppError } from '../middleware/errorHandler';
+import { emailService } from './email.service';
+
+type PublicUser = Omit<InsertUser, 'password' | 'emailVerificationToken' | 'emailVerificationExpiresAt'>;
 
 /**
  * Service for user authentication and authorization
@@ -18,8 +22,7 @@ export class AuthService {
    * @returns Promise resolving to user object (without password) and JWT token
    * @throws Error if user already exists
    */
-  async register(data: Omit<InsertUser, 'createdAt'>): Promise<{ user: Omit<InsertUser, 'password'>, token: string }> {
-    // Check if user exists
+  async register(data: Omit<InsertUser, 'createdAt' | 'emailVerifiedAt' | 'emailVerificationToken' | 'emailVerificationExpiresAt'>): Promise<{ user: PublicUser; message: string }> {
     const existing = await db
       .select()
       .from(users)
@@ -30,28 +33,38 @@ export class AuthService {
       throw new AppError('User already exists', 409);
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(data.password, BCRYPT_CONFIG.SALT_ROUNDS);
+    if (SERVER_CONFIG.IS_PRODUCTION && !emailService.isConfigured()) {
+      throw new AppError('Email delivery is not configured', 503);
+    }
 
-    // Create user
+    const hashedPassword = await bcrypt.hash(data.password, BCRYPT_CONFIG.SALT_ROUNDS);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationTokenHash = hashToken(verificationToken);
+    const verificationExpiresAt = new Date(
+      Date.now() + EMAIL_CONFIG.VERIFICATION_EXPIRES_HOURS * 60 * 60 * 1000
+    ).toISOString();
+
     const [newUser] = await db
       .insert(users)
       .values({
         ...data,
         password: hashedPassword,
+        emailVerifiedAt: null,
+        emailVerificationToken: verificationTokenHash,
+        emailVerificationExpiresAt: verificationExpiresAt,
       })
       .returning();
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
-      JWT_CONFIG.SECRET,
-      { expiresIn: JWT_CONFIG.EXPIRES_IN }
-    );
+    await emailService.sendVerificationEmail({
+      to: newUser.email,
+      name: newUser.name,
+      verificationUrl: buildVerificationUrl(verificationToken),
+    });
 
-    // Return user without password
-    const { password, ...userWithoutPassword } = newUser;
-    return { user: userWithoutPassword, token };
+    return {
+      user: toPublicUser(newUser),
+      message: 'Account created. Check your email to confirm your address.',
+    };
   }
 
   /**
@@ -61,8 +74,7 @@ export class AuthService {
    * @returns Promise resolving to user object (without password) and JWT token
    * @throws Error if credentials are invalid
    */
-  async login(email: string, password: string): Promise<{ user: Omit<InsertUser, 'password'>, token: string }> {
-    // Find user
+  async login(email: string, password: string): Promise<{ user: PublicUser, token: string }> {
     const [user] = await db
       .select()
       .from(users)
@@ -73,22 +85,60 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    // Verify password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       throw new Error('Invalid credentials');
     }
 
-    // Generate token
+    if (!user.emailVerifiedAt) {
+      throw new AppError('Confirm your email before logging in', 403);
+    }
+
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_CONFIG.SECRET,
       { expiresIn: JWT_CONFIG.EXPIRES_IN }
     );
 
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, token };
+    return { user: toPublicUser(user), token };
+  }
+
+  async verifyEmail(token: string): Promise<{ user: PublicUser; token: string }> {
+    const tokenHash = hashToken(token);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationToken, tokenHash))
+      .limit(1);
+
+    if (!user) {
+      throw new AppError('Invalid or expired verification link', 400);
+    }
+
+    if (
+      !user.emailVerificationExpiresAt ||
+      Number(new Date(user.emailVerificationExpiresAt)) < Date.now()
+    ) {
+      throw new AppError('Verification link expired', 400);
+    }
+
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        emailVerifiedAt: new Date().toISOString(),
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+      })
+      .where(eq(users.id, user.id!))
+      .returning();
+
+    const jwtToken = jwt.sign(
+      { userId: updatedUser.id, email: updatedUser.email },
+      JWT_CONFIG.SECRET,
+      { expiresIn: JWT_CONFIG.EXPIRES_IN }
+    );
+
+    return { user: toPublicUser(updatedUser), token: jwtToken };
   }
 
   /**
@@ -121,9 +171,29 @@ export class AuthService {
       return null;
     }
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return toPublicUser(user);
   }
+}
+
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+function buildVerificationUrl(token: string): string {
+  const url = new URL('/verify-email', SERVER_CONFIG.FRONTEND_URL);
+  url.searchParams.set('token', token);
+  return url.toString();
+}
+
+function toPublicUser(user: InsertUser): PublicUser {
+  const {
+    password,
+    emailVerificationToken,
+    emailVerificationExpiresAt,
+    ...publicUser
+  } = user;
+
+  return publicUser;
 }
 
 export const authService = new AuthService();

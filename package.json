@@ -55,6 +55,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.561.0",
     "nitro": "npm:nitro-nightly@latest",
+    "nodemailer": "^8.0.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",
@@ -84,6 +85,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.10.2",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
@@ -92,7 +94,6 @@
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.24",
     "concurrently": "^9.2.1",
-    "wait-on": "^8.0.1",
     "drizzle-kit": "^0.31.8",
     "jsdom": "^27.4.0",
     "playwright": "^1.58.2",
@@ -104,6 +105,7 @@
     "vite": "^7.1.7",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.2.4",
+    "wait-on": "^8.0.1",
     "web-vitals": "^5.1.0"
   }
 }

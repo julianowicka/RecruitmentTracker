@@ -6,6 +6,9 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
   name: text('name').notNull(),
+  emailVerifiedAt: text('email_verified_at'),
+  emailVerificationToken: text('email_verification_token'),
+  emailVerificationExpiresAt: text('email_verification_expires_at'),
   createdAt: text('created_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
@@ -64,4 +67,3 @@ export type Note = typeof notes.$inferSelect;
 export type InsertNote = typeof notes.$inferInsert;
 export type StatusHistory = typeof statusHistory.$inferSelect;
 export type InsertStatusHistory = typeof statusHistory.$inferInsert;
-

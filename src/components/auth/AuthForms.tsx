@@ -81,18 +81,22 @@ export function RegisterForm() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setIsLoading(true);
 
     try {
-      await register(email, password, name);
-      navigate({ to: '/dashboard' });
+      const message = await register(email, password, name);
+      setSuccess(message);
+      setEmail('');
+      setPassword('');
+      setName('');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -107,6 +111,12 @@ export function RegisterForm() {
       {error && (
         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 bg-emerald-100 border border-emerald-400 text-emerald-800 rounded">
+          {success}
         </div>
       )}
 
