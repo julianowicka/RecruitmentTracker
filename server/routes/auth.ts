@@ -77,6 +77,40 @@ authRouter.post(
 );
 
 authRouter.get(
+  '/verify-email',
+  asyncHandler(async (req, res) => {
+    const rawToken = req.query.token;
+    const normalizedToken = typeof rawToken === 'string' ? rawToken.trim() : '';
+
+    const redirectToVerificationPage = (status: 'success' | 'error', message?: string) => {
+      const url = new URL('/verify-email', SERVER_CONFIG.FRONTEND_URL);
+      url.searchParams.set('status', status);
+
+      if (message) {
+        url.searchParams.set('message', message);
+      }
+
+      res.redirect(url.toString());
+    };
+
+    if (!normalizedToken) {
+      redirectToVerificationPage('error', 'Brakuje tokenu potwierdzajacego.');
+      return;
+    }
+
+    try {
+      await authService.verifyEmail(normalizedToken);
+      redirectToVerificationPage('success', 'Email potwierdzony. Mozesz sie teraz zalogowac.');
+    } catch (error) {
+      redirectToVerificationPage(
+        'error',
+        error instanceof Error ? error.message : 'Potwierdzenie emaila nie powiodlo sie'
+      );
+    }
+  })
+);
+
+authRouter.get(
   '/me',
   asyncHandler(async (req, res) => {
     const authHeader = req.headers.authorization;

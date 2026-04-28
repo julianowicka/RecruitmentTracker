@@ -122,15 +122,15 @@ export class AuthService {
       throw new AppError('Verification link expired', 400);
     }
 
-    const [updatedUser] = await db
-      .update(users)
-      .set({
-        emailVerifiedAt: new Date().toISOString(),
-        emailVerificationToken: null,
-        emailVerificationExpiresAt: null,
-      })
-      .where(eq(users.id, user.id!))
-      .returning();
+    const [updatedUser] = user.emailVerifiedAt
+      ? [user]
+      : await db
+          .update(users)
+          .set({
+            emailVerifiedAt: new Date().toISOString(),
+          })
+          .where(eq(users.id, user.id!))
+          .returning();
 
     const jwtToken = jwt.sign(
       { userId: updatedUser.id, email: updatedUser.email },
@@ -180,7 +180,7 @@ function hashToken(token: string): string {
 }
 
 function buildVerificationUrl(token: string): string {
-  const url = new URL('/verify-email', SERVER_CONFIG.FRONTEND_URL);
+  const url = new URL('/api/auth/verify-email', SERVER_CONFIG.FRONTEND_URL);
   url.searchParams.set('token', token);
   return url.toString();
 }

@@ -7,6 +7,8 @@ import { Card, CardContent } from '../components/ui/card';
 
 const verifyEmailSearchSchema = z.object({
   token: z.string().optional().catch(undefined),
+  status: z.enum(['success', 'error']).optional().catch(undefined),
+  message: z.string().optional().catch(undefined),
 });
 
 export const Route = createFileRoute('/verify-email')({
@@ -15,7 +17,7 @@ export const Route = createFileRoute('/verify-email')({
 });
 
 function VerifyEmailPage() {
-  const { token } = Route.useSearch();
+  const { token, status: statusFromUrl, message: messageFromUrl } = Route.useSearch();
   const { verifyEmail } = useAuth();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -23,6 +25,17 @@ function VerifyEmailPage() {
   const hasVerified = useRef(false);
 
   useEffect(() => {
+    if (statusFromUrl) {
+      setStatus(statusFromUrl);
+      setMessage(
+        messageFromUrl ||
+          (statusFromUrl === 'success'
+            ? 'Email potwierdzony. Mozesz sie teraz zalogowac.'
+            : 'Potwierdzenie emaila nie powiodlo sie')
+      );
+      return;
+    }
+
     if (!token) {
       setStatus('error');
       setMessage('Brakuje tokenu potwierdzajacego.');
@@ -35,10 +48,16 @@ function VerifyEmailPage() {
 
     hasVerified.current = true;
     let isActive = true;
+    const timeout = window.setTimeout(() => {
+      if (!isActive) return;
+      setStatus('error');
+      setMessage('Potwierdzenie trwa zbyt dlugo. Odswiez strone albo sprobuj zalogowac sie za chwile.');
+    }, 15000);
 
     verifyEmail(token)
       .then(() => {
         if (!isActive) return;
+        window.clearTimeout(timeout);
         setStatus('success');
         setMessage('Email potwierdzony. Przekierowujemy do dashboardu...');
         setTimeout(() => {
@@ -47,14 +66,16 @@ function VerifyEmailPage() {
       })
       .catch((error: Error) => {
         if (!isActive) return;
+        window.clearTimeout(timeout);
         setStatus('error');
         setMessage(error.message);
       });
 
     return () => {
       isActive = false;
+      window.clearTimeout(timeout);
     };
-  }, [navigate, token, verifyEmail]);
+  }, [messageFromUrl, navigate, statusFromUrl, token, verifyEmail]);
 
   const Icon = status === 'success' ? CheckCircle2 : status === 'error' ? XCircle : Loader2;
 
@@ -82,12 +103,12 @@ function VerifyEmailPage() {
             <p className="mt-2 text-sm text-slate-600">{message}</p>
           </div>
 
-          {status === 'error' && (
+          {status !== 'loading' && (
             <Link
               to="/auth"
               className="inline-flex h-10 items-center justify-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white no-underline transition hover:bg-slate-800"
             >
-              Wroc do logowania
+              Przejdz do logowania
             </Link>
           )}
         </CardContent>
