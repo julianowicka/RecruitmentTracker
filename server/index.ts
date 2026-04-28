@@ -21,6 +21,10 @@ const currentFilePath = fileURLToPath(import.meta.url);
 const currentDir = path.dirname(currentFilePath);
 const distDir = path.resolve(currentDir, '../dist');
 
+if (SERVER_CONFIG.IS_PRODUCTION) {
+  app.set('trust proxy', 1);
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: {
